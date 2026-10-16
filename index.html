@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&family=Noto+Nastaliq+Urdu&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a5e35">
+<title>'Uloom al-Qur'an — Study Guide</title>
+<style>
+/* ===== Glass theme (dark default) ===== */
+:root{
+  --bg:#060b14;--bg2:#0b1424;
+  --glass:rgba(255,255,255,.045);--glass2:rgba(255,255,255,.075);--glass-hi:rgba(255,255,255,.11);
+  --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.16);
+  --text:#e7edf5;--muted:#8d9bb0;--strong:#ffffff;
+  --accent:#2ee6b6;--accent2:#22b8e6;--accent-soft:rgba(46,230,182,.12);--glow:0 0 24px rgba(46,230,182,.28);
+  --gold:#f2c14e;--gold-soft:rgba(242,193,78,.12);
+  --info:#7aa7ff;--warn:#ff7a85;--ok:#3ddc97;--bad:#ff6b7a;
+  --r:18px;--rs:12px;--blur:blur(18px) saturate(140%);
+  --sh:0 10px 40px rgba(0,0,0,.35);
+  --sb:280px;--rail:280px;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --display:"Space Grotesk","Inter",system-ui,sans-serif;
+}
+:root[data-theme="light"]{
+  --bg:#eef2f8;--bg2:#e3e9f3;
+  --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.7);--glass-hi:rgba(255,255,255,.9);
+  --line:rgba(15,30,60,.09);--line2:rgba(15,30,60,.16);
+  --text:#1a2333;--muted:#5d6b80;--strong:#0b1220;
+  --accent:#0aa37f;--accent2:#0b84b5;--accent-soft:rgba(10,163,127,.1);--glow:0 0 20px rgba(10,163,127,.18);
+  --gold:#b98309;--gold-soft:rgba(185,131,9,.1);
+  --info:#2f62d6;--warn:#c9303f;--ok:#14935d;--bad:#c9303f;
+  --sh:0 10px 30px rgba(30,50,90,.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.7;min-height:100vh;overflow-x:hidden;font-size:16.5px}
+button{font-family:inherit;color:inherit}
+/* ambient background */
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+  background:radial-gradient(40% 35% at 15% 10%,rgba(46,230,182,.16),transparent 70%),
+             radial-gradient(35% 30% at 85% 20%,rgba(34,184,230,.14),transparent 70%),
+             radial-gradient(45% 40% at 60% 95%,rgba(120,90,255,.10),transparent 70%),var(--bg);
+  animation:drift 30s ease-in-out infinite alternate}
+:root[data-theme="light"] body::before{background:radial-gradient(40% 35% at 15% 10%,rgba(10,163,127,.14),transparent 70%),radial-gradient(35% 30% at 85% 20%,rgba(11,132,181,.12),transparent 70%),radial-gradient(45% 40% at 60% 95%,rgba(120,90,255,.08),transparent 70%),var(--bg)}
+@keyframes drift{to{transform:translate3d(3%,2%,0) scale(1.05)}}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+
+/* ---- layout ---- */
+#app{display:flex;min-height:100vh}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:90}
+#overlay.on{display:block}
+#sidebar{width:var(--sb);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column;
+  background:var(--glass);border-right:1px solid var(--line);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  transition:transform .28s ease;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.sb-head{padding:22px 18px 16px;border-bottom:1px solid var(--line)}
+.sb-title{font-family:var(--display);font-size:1.05rem;font-weight:700;color:var(--strong);letter-spacing:.2px}
+.sb-title::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:var(--glow);margin-right:9px;vertical-align:middle}
+.sb-sub{font-size:.72rem;color:var(--muted);margin-top:4px;letter-spacing:.6px;text-transform:uppercase}
+#chapterNav{flex:1;padding:10px}
+.nav-item{display:flex;align-items:center;gap:11px;width:100%;min-height:44px;padding:9px 11px;margin-bottom:3px;background:none;border:1px solid transparent;border-radius:var(--rs);text-align:left;cursor:pointer;color:var(--muted);font:inherit;transition:all .15s}
+.nav-item:hover{background:var(--glass2);color:var(--text)}
+.nav-item.active{background:var(--accent-soft);border-color:rgba(46,230,182,.3);color:var(--strong)}
+.nav-num{font-family:var(--display);font-size:.72rem;font-weight:700;min-width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line2);flex-shrink:0}
+.nav-item.active .nav-num{border-color:var(--accent);color:var(--accent)}
+.nav-item.done .nav-num{background:var(--accent);border-color:var(--accent);color:#04120d}
+.nav-lbl{font-size:.85rem;flex:1;line-height:1.3}
+.nav-tick{font-size:.75rem;color:var(--accent)}
+.sb-foot{padding:12px;border-top:1px solid var(--line);display:grid;gap:8px}
+.sb-btn,#finalNavBtn{width:100%;min-height:44px;padding:10px;border-radius:var(--rs);font-size:.84rem;font-weight:600;cursor:pointer;border:1px solid var(--line2);background:var(--glass2);color:var(--text);transition:all .15s}
+.sb-btn:hover{background:var(--glass-hi)}
+#finalNavBtn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#04120d;font-weight:700}
+#finalNavBtn:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.6)}
+
+#main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0}
+#topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:0 22px;padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 60%,transparent);border-bottom:1px solid var(--line);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+#menuBtn{display:none;flex-direction:column;gap:4px;align-items:center;justify-content:center;min-width:44px;min-height:44px;background:none;border:none;cursor:pointer}
+#menuBtn span{display:block;width:20px;height:2px;background:var(--text);border-radius:2px}
+#topTitle{font-family:var(--display);font-size:.95rem;font-weight:600;color:var(--strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbar{height:3px;background:var(--line);border-radius:3px;margin-top:6px;overflow:hidden}
+.pbar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:var(--glow);transition:width .4s ease}
+#topCounter{font-family:var(--display);font-size:.8rem;color:var(--muted);white-space:nowrap}
+#themeBtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:var(--glass2);cursor:pointer;font-size:1rem;flex-shrink:0}
+
+#shell{display:flex;gap:28px;justify-content:center;padding:28px 32px calc(70px + env(safe-area-inset-bottom));width:100%;max-width:1320px;margin:0 auto}
+#content{flex:1;min-width:0;max-width:820px}
+#content:focus{outline:none}
+#rail{width:var(--rail);flex-shrink:0;display:none}
+#rail .rail-in{position:sticky;top:88px;display:grid;gap:14px}
+.rail-card{background:var(--glass);border:1px solid var(--line);border-radius:var(--r);padding:16px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.rail-h{font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:600}
+.toc a{display:block;padding:6px 10px;margin-left:-10px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-size:.84rem;line-height:1.4;border-radius:0 8px 8px 0}
+.toc a:hover{color:var(--text);background:var(--glass2)}
+.toc a.on{color:var(--accent);border-left-color:var(--accent);background:var(--accent-soft)}
+.ring{display:flex;align-items:center;gap:14px}
+.ring svg{flex-shrink:0}
+.ring-n{font-family:var(--display);font-size:1.4rem;font-weight:700;color:var(--strong);line-height:1}
+.ring-l{font-size:.78rem;color:var(--muted)}
+.rail-btn{width:100%;min-height:44px;margin-top:12px;border-radius:var(--rs);border:none;cursor:pointer;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04120d;box-shadow:var(--glow)}
+@media(min-width:1200px){#rail{display:block}}
+
+/* ---- home ---- */
+.home-bism{text-align:center;font-size:1.6rem;color:var(--accent);margin:6px 0 10px;text-shadow:var(--glow)}
+.home-h{text-align:center;font-family:var(--display);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;color:var(--strong);letter-spacing:-.5px;margin-bottom:6px}
+.home-sub{text-align:center;color:var(--muted);font-size:.92rem;margin-bottom:26px}
+.summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.summary-bar>div{background:var(--glass);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.stat-n{font-family:var(--display);font-size:1.7rem;font-weight:700;color:var(--accent);line-height:1.1}
+.stat-l{font-size:.72rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.6px}
+.continue-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;margin-bottom:18px;padding:14px 18px;border-radius:var(--r);border:1px solid rgba(46,230,182,.35);background:linear-gradient(135deg,rgba(46,230,182,.18),rgba(34,184,230,.12));color:var(--strong);font:inherit;font-weight:600;text-align:left;cursor:pointer;box-shadow:var(--glow);transition:transform .15s}
+.continue-btn:hover{transform:translateY(-1px)}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.ch-card{display:flex;gap:12px;align-items:flex-start;width:100%;padding:16px;text-align:left;font:inherit;cursor:pointer;border-radius:var(--r);background:var(--glass);border:1px solid var(--line);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);transition:all .2s}
+.ch-card:hover{border-color:rgba(46,230,182,.4);background:var(--glass2);transform:translateY(-2px);box-shadow:var(--sh)}
+.ch-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;background:var(--glass2);border:1px solid var(--line2)}
+.ch-card.done-card .ch-icon{border-color:var(--accent);box-shadow:var(--glow)}
+.ch-info{flex:1;min-width:0}
+.ch-num-label{font-family:var(--display);font-size:.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.ch-card-title{font-size:.95rem;font-weight:600;color:var(--strong);line-height:1.3;margin-bottom:3px}
+.ch-card-sub{font-size:.8rem;color:var(--muted);line-height:1.4}
+.ch-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.badge{font-size:.68rem;font-weight:600;padding:2px 9px;border-radius:20px;border:1px solid var(--line2);color:var(--muted)}
+.badge.read{color:var(--accent2);border-color:rgba(34,184,230,.35)}
+.badge.quiz{color:var(--accent);border-color:rgba(46,230,182,.4);background:var(--accent-soft)}
+.btn-start-final{min-height:48px;padding:12px 30px;border-radius:30px;border:none;cursor:pointer;font-weight:700;font-size:1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04120d;box-shadow:var(--glow)}
+
+/* ---- chapter ---- */
+.ch-num-badge{display:inline-block;font-family:var(--display);font-size:.72rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);padding:4px 12px;border-radius:20px;border:1px solid rgba(46,230,182,.35);background:var(--accent-soft);margin-bottom:12px}
+.ch-main-title{font-family:var(--display);font-size:clamp(1.7rem,3.5vw,2.3rem);font-weight:700;color:var(--strong);letter-spacing:-.5px;line-height:1.15;margin-bottom:8px}
+.ch-main-sub{font-size:1rem;color:var(--muted);margin-bottom:18px}
+.ch-intro{position:relative;padding:18px 20px 18px 24px;margin-bottom:22px;border-radius:var(--r);background:linear-gradient(135deg,rgba(46,230,182,.10),rgba(34,184,230,.06));border:1px solid rgba(46,230,182,.22);font-size:1.02rem;line-height:1.75;color:var(--text)}
+.ch-intro::before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:3px;border-radius:3px;background:linear-gradient(var(--accent),var(--accent2));box-shadow:var(--glow)}
+
+.sec{position:relative;padding:22px 24px;margin-bottom:16px;border-radius:var(--r);background:var(--glass);border:1px solid var(--line);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);overflow-x:auto;scroll-margin-top:84px}
+.sec h3{font-family:var(--display);font-size:1.18rem;font-weight:600;color:var(--strong);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:var(--glow);flex-shrink:0}
+.sec h4{font-size:.98rem;font-weight:600;color:var(--accent);margin:16px 0 8px}
+.sec h5{font-size:.95rem;font-weight:600;color:var(--strong);margin:4px 0 4px}
+.sec p{margin-bottom:10px;line-height:1.75}
+.sec ul,.sec ol{margin:8px 0 10px 22px;line-height:1.75}
+.sec li{margin-bottom:4px}
+.sec li::marker{color:var(--accent)}
+.sec strong{color:var(--strong);font-weight:600}
+.sec em{color:var(--text)}
+.sec table{width:100%;border-collapse:separate;border-spacing:0;margin:12px 0;font-size:.9rem;border:1px solid var(--line);border-radius:var(--rs);overflow:hidden}
+.sec th{background:var(--glass2);color:var(--muted);padding:10px 14px;text-align:left;font-size:.72rem;letter-spacing:.8px;text-transform:uppercase;font-weight:600;border-bottom:1px solid var(--line)}
+.sec td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.sec tr:last-child td{border-bottom:none}
+.sec tbody tr:hover td,.sec tr:hover td{background:var(--glass2)}
+
+/* callouts: one family, different accent edge + icon */
+.cbox,.hbox,.hibox,.tipbox,.warnbox{position:relative;margin:12px 0;padding:14px 16px 14px 18px;border-radius:var(--rs);background:var(--glass2);border:1px solid var(--line);font-size:.95rem;line-height:1.7;color:var(--text)}
+.cbox::before,.hbox::before,.hibox::before,.tipbox::before,.warnbox::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--c,var(--accent))}
+.cbox{--c:var(--accent)}
+.cbox strong{color:var(--strong)}
+.hbox{--c:var(--accent2);font-style:normal;padding-left:46px}
+.hbox::after{content:"\201C";position:absolute;left:14px;top:2px;font-family:Georgia,serif;font-size:2.6rem;line-height:1;color:var(--accent2);opacity:.55}
+.hbox .src{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:600;letter-spacing:.4px;color:var(--accent2);padding:2px 10px;border-radius:20px;border:1px solid rgba(34,184,230,.35);background:rgba(34,184,230,.08)}
+.hibox{--c:var(--gold)}
+.hibox strong{color:var(--gold)}
+.tipbox{--c:var(--info)}
+.tipbox b{display:block;color:var(--info);font-size:.8rem;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.warnbox{--c:var(--warn);background:color-mix(in srgb,var(--warn) 7%,transparent)}
+
+.stages{margin:6px 0;position:relative}
+.stage{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;position:relative}
+.stage:not(:last-child)::after{content:"";position:absolute;left:15px;top:34px;bottom:-14px;width:1px;background:linear-gradient(var(--accent),transparent)}
+.stg-n{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:.85rem;flex-shrink:0;color:var(--accent);border:1px solid rgba(46,230,182,.4);background:var(--accent-soft)}
+.stg-c h5{font-size:1rem;margin-bottom:4px}
+.stg-c p{margin-bottom:0}
+
+/* recap */
+.recap{margin:20px 0 8px;padding:20px 22px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold-soft),transparent);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent)}
+.recap h3{font-family:var(--display);font-size:1.1rem;color:var(--gold);margin-bottom:6px}
+.recap p{font-size:.92rem;color:var(--muted);margin-bottom:10px}
+.recap ol{margin-left:22px;line-height:2}
+.recap a{color:var(--text);text-decoration:none;border-bottom:1px dashed color-mix(in srgb,var(--gold) 60%,transparent)}
+.recap a:hover{color:var(--gold)}
+
+/* quiz call to action + nav */
+.quiz-cta{margin-top:22px;padding:28px 24px;text-align:center;border-radius:var(--r);background:linear-gradient(135deg,rgba(46,230,182,.14),rgba(34,184,230,.10));border:1px solid rgba(46,230,182,.3);box-shadow:var(--glow)}
+.qcta-icon{font-size:2rem;margin-bottom:6px}
+.qcta-title{font-family:var(--display);font-size:1.25rem;font-weight:700;color:var(--strong);margin-bottom:6px}
+.qcta-sub{font-size:.9rem;color:var(--muted);margin-bottom:18px}
+.qcta-done{display:inline-flex;gap:6px;padding:6px 16px;border-radius:30px;margin-bottom:10px;font-weight:600;color:var(--accent);border:1px solid rgba(46,230,182,.4);background:var(--accent-soft)}
+.btn-quiz{min-height:46px;padding:11px 32px;border-radius:30px;border:none;cursor:pointer;font-weight:700;font-size:.98rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04120d;box-shadow:var(--glow);transition:transform .15s}
+.btn-quiz:hover{transform:scale(1.03)}
+.redo-lnk{background:none;border:none;font:inherit;font-size:.85rem;padding:8px;color:var(--muted);text-decoration:underline;cursor:pointer}
+.ch-nav-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn-nav,.rbtn{flex:1;min-width:120px;min-height:46px;padding:10px 18px;border-radius:var(--rs);font-size:.9rem;font-weight:600;cursor:pointer;background:var(--glass);border:1px solid var(--line2);color:var(--text);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);transition:all .15s}
+.btn-nav:hover,.rbtn:hover{background:var(--glass-hi)}
+.btn-nav.pri,.rbtn.pri{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;color:#04120d;box-shadow:var(--glow)}
+
+/* quiz */
+.quiz-wrap{max-width:720px;margin:0 auto}
+.quiz-lbl{font-size:.75rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.quiz-prow{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.quiz-qc,.quiz-score{font-family:var(--display);font-size:.85rem;color:var(--muted);flex-shrink:0}
+.quiz-score{color:var(--accent);font-weight:700}
+.quiz-track{flex:1;height:4px;background:var(--line);border-radius:3px;overflow:hidden}
+.quiz-pfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:var(--glow);transition:width .35s ease}
+.q-card{padding:24px;border-radius:var(--r);background:var(--glass);border:1px solid var(--line);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh)}
+.q-text{font-family:var(--display);font-size:1.15rem;font-weight:600;color:var(--strong);line-height:1.5;margin-bottom:18px}
+.opts{display:grid;gap:9px}
+.opt{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:48px;padding:12px 14px;border-radius:var(--rs);background:var(--glass2);border:1px solid var(--line);text-align:left;font-size:.95rem;line-height:1.5;cursor:pointer;transition:all .15s}
+.opt:hover:not(:disabled){border-color:rgba(46,230,182,.45);background:var(--accent-soft)}
+.opt-l{font-family:var(--display);font-size:.75rem;font-weight:700;min-width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line2);color:var(--muted);flex-shrink:0}
+.opt.cor{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.opt.cor .opt-l{background:var(--ok);border-color:var(--ok);color:#04120d}
+.opt.wrg{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.opt.wrg .opt-l{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.feedback{display:none;margin-top:14px;padding:13px 15px;border-radius:var(--rs);font-size:.92rem;line-height:1.65;border:1px solid var(--line)}
+.feedback.show{display:block}
+.feedback.cor-f{background:color-mix(in srgb,var(--ok) 10%,transparent);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.feedback.wrg-f{background:color-mix(in srgb,var(--bad) 10%,transparent);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.feedback .fl{font-weight:700;margin-bottom:3px;color:var(--strong)}
+.qbtn-row{display:flex;justify-content:flex-end;margin-top:14px}
+.btn-next{min-height:46px;padding:10px 24px;border-radius:var(--rs);border:none;cursor:pointer;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04120d;box-shadow:var(--glow)}
+
+/* results */
+.res-wrap{max-width:720px;margin:0 auto;text-align:center;padding:10px 0}
+.res-stars{font-size:2rem;margin-bottom:10px;letter-spacing:4px}
+.res-circle{width:120px;height:120px;border-radius:50%;margin:0 auto 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--glass);border:2px solid var(--accent);box-shadow:var(--glow),inset 0 0 30px rgba(46,230,182,.15)}
+.res-sn{font-family:var(--display);font-size:2.2rem;font-weight:700;color:var(--strong);line-height:1}
+.res-st{font-size:.75rem;color:var(--muted)}
+.res-title{font-family:var(--display);font-size:1.35rem;font-weight:700;color:var(--strong);margin-bottom:6px}
+.res-msg{color:var(--muted);margin-bottom:18px}
+.res-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.fail-box{max-width:500px;margin:0 auto 18px;padding:16px;border-radius:var(--r);background:color-mix(in srgb,var(--bad) 10%,transparent);border:1px solid color-mix(in srgb,var(--bad) 40%,transparent);line-height:1.6}
+.fail-box b{color:var(--bad)}
+.fail-box .rbtn{margin-top:12px;max-width:220px}
+.pass-box{display:inline-block;margin-bottom:18px;padding:6px 18px;border-radius:30px;font-weight:600;color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 45%,transparent);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.review{margin-top:26px;text-align:left}
+.review h4{font-family:var(--display);font-size:1rem;margin-bottom:10px;color:var(--strong)}
+.rev-item{padding:14px 16px;margin-bottom:10px;border-radius:var(--rs);background:var(--glass);border:1px solid var(--line);border-left:3px solid var(--bad)}
+.rev-item.was-ok{border-left-color:var(--ok)}
+.rev-q{font-weight:600;color:var(--strong);margin-bottom:6px;font-size:.92rem}
+.rev-yours{font-size:.86rem;color:var(--bad)}
+.rev-item.was-ok .rev-yours{color:var(--ok)}
+.rev-correct{font-size:.86rem;color:var(--ok);font-weight:600}
+.rev-exp{font-size:.84rem;color:var(--muted);margin-top:6px}
+
+/* final intro */
+.final-intro{max-width:620px;margin:0 auto;text-align:center;padding:32px 24px;border-radius:var(--r);background:var(--glass);border:1px solid var(--line);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.fi-icon{font-size:2.8rem;margin-bottom:10px}
+.fi-title{font-family:var(--display);font-size:1.6rem;font-weight:700;color:var(--strong);margin-bottom:8px}
+.fi-desc{color:var(--muted);margin:0 auto 22px;max-width:480px}
+.fi-stats{display:flex;justify-content:center;gap:30px;margin-bottom:22px;flex-wrap:wrap}
+.fi-stat-n{font-family:var(--display);font-size:1.6rem;font-weight:700;color:var(--accent)}
+.fi-stat-l{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.lock-note{font-size:.82rem;color:var(--muted);margin-top:12px}
+
+/* glossary */
+.gloss-q{width:100%;min-height:46px;padding:12px 16px;margin-bottom:14px;border-radius:var(--rs);border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-size:16px;backdrop-filter:var(--blur)}
+.gloss-q::placeholder{color:var(--muted)}
+#glossList{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.g-item{padding:14px 16px;border-radius:var(--rs);background:var(--glass);border:1px solid var(--line)}
+.g-top{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.g-term{font-weight:700;color:var(--strong)}
+.g-ar{font-size:1.2rem;color:var(--accent)}
+.g-mean{font-size:.9rem;color:var(--muted);margin-top:4px}
+.g-ch{background:none;border:none;padding:6px 0 0;font:inherit;font-size:.78rem;color:var(--accent2);cursor:pointer;text-decoration:underline}
+
+/* Arabic & Urdu */
+.art{font-family:"Amiri","Traditional Arabic","Geeza Pro","Noto Naskh Arabic",serif;font-size:1.25em;line-height:1.6;unicode-bidi:isolate}
+.urt,.ur{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Amiri",serif}
+.urt{unicode-bidi:isolate}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+
+/* responsive */
+@media(max-width:860px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0);box-shadow:var(--sh)}
+  #main{margin-left:0}
+  #menuBtn{display:flex}
+  #topbar{padding-left:10px;padding-right:12px}
+  #shell{padding:18px max(16px,env(safe-area-inset-left)) calc(60px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right))}
+  .sec{padding:18px 16px}
+  .summary-bar{grid-template-columns:repeat(3,1fr);gap:8px}
+  .summary-bar>div{padding:12px 6px}
+  .stat-n{font-size:1.35rem}
+  .ch-grid,#glossList{grid-template-columns:1fr}
+  .res-btns,.ch-nav-row{flex-direction:column}
+  .q-card{padding:18px}
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fade{animation:fadeUp .3s ease}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--glass:rgba(20,30,48,.92);--glass2:rgba(30,42,64,.92)}:root[data-theme="light"]{--glass:rgba(255,255,255,.95);--glass2:#fff}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{#sidebar,#topbar,#rail,.ch-nav-row,.quiz-cta{display:none!important}#main{margin:0}body::before{display:none}}
+
+</style>
+</head>
+<body><noscript><div style="max-width:520px;margin:15vh auto;padding:24px;font:16px/1.6 system-ui,sans-serif;color:#e7edf5;background:#0b1424;border-radius:16px;text-align:center"><h2 style="margin-bottom:10px">Open this in your browser</h2><p>This viewer can't run the study guide. Tap the menu or share button and choose <b>Open in Chrome</b> or <b>Open in Safari</b>.</p></div></noscript>
+<div id="app">
+  <div id="overlay" onclick="closeSidebar()"></div>
+  <div id="sidebar" aria-label="Chapters">
+    <div class="sb-head">
+      <div class="sb-title">'Uloom al-Qur'an</div>
+      <div class="sb-sub">Interactive Study Guide</div>
+    </div>
+    <nav id="chapterNav"></nav>
+    <div class="sb-foot">
+      <button id="glossBtn" class="sb-btn" onclick="showGlossary()">📖 Glossary of Terms</button>
+      <button id="finalNavBtn" onclick="showFinalQuiz()" disabled>&#127942; Final Comprehensive Quiz</button>
+    </div>
+  </div>
+  <div id="main">
+    <div id="topbar">
+      <button id="menuBtn" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div style="flex:1;min-width:0">
+        <div id="topTitle">'Uloom al-Qur'an Study Guide</div>
+        <div class="pbar" role="progressbar" aria-label="Chapters completed" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="pbar"><div class="pbar-fill" id="pbarFill" style="width:0%"></div></div>
+      </div>
+      <span id="topCounter">0/10</span>
+      <button id="themeBtn" onclick="toggleTheme()" aria-label="Switch light or dark mode">🌙</button>
+    </div>
+    <div id="shell"><main id="content" class="fade" tabindex="-1"></main><aside id="rail" aria-label="Chapter tools"><div class="rail-in" id="railIn"></div></aside></div>
+  </div>
+</div>
+<script>
+// Storage that never throws (private mode, in-app viewers, file:// on some phones)
+const safeStorage=(()=>{const mem={};let ok=false;try{const k='__t';localStorage.setItem(k,k);localStorage.removeItem(k);ok=true}catch(e){}
+return{getItem:k=>{if(ok){try{return localStorage.getItem(k)}catch(e){}}return k in mem?mem[k]:null},
+setItem:(k,v)=>{mem[k]=String(v);if(ok){try{localStorage.setItem(k,v)}catch(e){}}}}})();
+const CHAPTERS=[
+{id:1,num:"1",title:"Introduction to 'Uloom al-Qur'an",sub:"The Sciences of the Qur'an — an overview",icon:"📚",
+intro:"'Uloom al-Qur'an (علوم القرآن) means 'The Sciences of the Qur'an' — a collective term for all Islamic fields of knowledge that relate to the Qur'an. Mastering these sciences is the gateway to truly understanding Allah's final Book.",
+content:`
+<div class="sec"><h3>What is 'Uloom al-Qur'an?</h3>
+<div class="cbox"><strong>'Uloom al-Qur'an</strong> literally means <strong>"The Sciences of the Qur'an."</strong> It is not a single subject — it is an <em>umbrella</em> covering every field of Islamic knowledge that helps us understand the Qur'an.</div>
+<p>Think of it as a toolkit. Each tool answers a different question about the Qur'an:</p>
+<ul>
+<li><strong>How was it revealed?</strong> → al-Wahy (Inspiration)</li>
+<li><strong>Why gradually?</strong> → Gradual Revelation</li>
+<li><strong>How was it compiled?</strong> → Compilation of the Qur'an</li>
+<li><strong>Are there valid different recitations?</strong> → al-Qira'at</li>
+<li><strong>What are the 7 modes?</strong> → al-Ahruf</li>
+<li><strong>Which verses came from Makkah vs Madeenah?</strong> → Makkee and Madanee</li>
+<li><strong>Why were specific verses revealed?</strong> → Asbaab an-Nuzool</li>
+</ul>
+</div>
+<div class="sec"><h3>Why Study it?</h3>
+<p>Without these sciences, a person reading the Qur'an can easily:</p>
+<ul>
+<li>Misunderstand a verse by ignoring its context</li>
+<li>Apply a specific ruling universally (or vice versa)</li>
+<li>Be confused by different authentic recitations</li>
+<li>Miss the rich layers of meaning in the text</li>
+</ul>
+<div class="hibox"><strong>Ibn Taymiyyah said:</strong> "Knowledge of the causes of revelation produces knowledge of its correct application."</div>
+<div class="hibox"><strong>al-Waahidee said:</strong> "It is impossible to properly interpret a verse without reflecting over its context and circumstance."</div>
+</div>
+<div class="sec"><h3>Historical Development</h3>
+<div class="stages">
+<div class="stage"><div class="stg-n">1</div><div class="stg-c"><h5>Era of the Companions</h5><p>The Companions practised these sciences naturally — they witnessed the revelations firsthand and knew the context of every verse.</p></div></div>
+<div class="stage"><div class="stg-n">2</div><div class="stg-c"><h5>Era of the Successors (Tabi'een)</h5><p>They began documenting what they received from the Companions. Mujaahid, Sa'eed ibn Jubayr, and Qataadah were among the first to record explanations.</p></div></div>
+<div class="stage"><div class="stg-n">3</div><div class="stg-c"><h5>Era of Formal Scholarship</h5><p>'Alee al-Madeenee (d.234 AH), teacher of Imaam al-Bukhaaree, wrote the first dedicated book on Asbaab an-Nuzool. Later scholars formalized the entire discipline.</p></div></div>
+<div class="stage"><div class="stg-n">4</div><div class="stg-c"><h5>Classical Masterworks</h5><p>Imaam az-Zarkashee (d.794 AH) wrote <em>al-Burhaan fi 'Uloom al-Qur'aan</em>, and as-Suyootee (d.911 AH) wrote the comprehensive <em>al-Itqaan fi 'Uloom al-Qur'aan</em> — still the standard reference today.</p></div></div>
+</div>
+</div>
+<div class="sec"><h3>What This Course Covers</h3>
+<p>This guide walks through 10 foundational chapters covering the most essential sciences:</p>
+<table><tr><th>#</th><th>Science</th><th>Core Question</th></tr>
+<tr><td>2</td><td>The Qur'an</td><td>What are its names and its status?</td></tr>
+<tr><td>3</td><td>al-Wahy</td><td>How was revelation delivered?</td></tr>
+<tr><td>4</td><td>Gradual Revelation</td><td>Why not all at once?</td></tr>
+<tr><td>5</td><td>First &amp; Last Verses</td><td>When did it begin and end?</td></tr>
+<tr><td>6</td><td>Compilation</td><td>How was it preserved?</td></tr>
+<tr><td>7</td><td>The Ahruf</td><td>Why are there 7 modes?</td></tr>
+<tr><td>8</td><td>The Qira'at</td><td>What are the 10 recitations?</td></tr>
+<tr><td>9</td><td>Makkee &amp; Madanee</td><td>How do we classify verses?</td></tr>
+<tr><td>10</td><td>Asbaab an-Nuzool</td><td>Why were specific verses revealed?</td></tr>
+</table>
+</div>`},
+
+{id:2,num:"2",title:"The Qur'an",sub:"Names, status, and virtues of Allah's Book",icon:"🌟",
+intro:"The Qur'an has multiple names, each revealing a different dimension of its nature. It is the most recited, most memorized, and most preserved book in human history.",
+content:`
+<div class="sec"><h3>The 5 Primary Names of the Qur'an</h3>
+<div class="stages">
+<div class="stage"><div class="stg-n">1</div><div class="stg-c"><h5>Al-Qur'an (القرآن) — The Recitation</h5><p>The most common name. From the root <em>qara'a</em> — to read/recite. Preserved in the <strong>hearts</strong> of believers. Mentioned ~70 times in the Qur'an itself.</p></div></div>
+<div class="stage"><div class="stg-n">2</div><div class="stg-c"><h5>Al-Kitaab (الكتاب) — The Book</h5><p>Mentioned <strong>77 times</strong>. Emphasises its <strong>written preservation</strong>. [2:1-2] <em>"This is the Book, there is no doubt in it, a guidance for the pious."</em><br><strong>Key distinction:</strong> Qur'an = preserved in hearts; Kitaab = preserved in writing.</p></div></div>
+<div class="stage"><div class="stg-n">3</div><div class="stg-c"><h5>Al-Furqaan (الفرقان) — The Criterion</h5><p>Mentioned <strong>4 times</strong>. It is the criterion that distinguishes truth from falsehood, good from evil, tawheed from shirk. [25:1] <em>"Blessed is He who sent down the Criterion to His servant..."</em></p></div></div>
+<div class="stage"><div class="stg-n">4</div><div class="stg-c"><h5>Al-Dhikr (الذكر) — The Reminder</h5><p>Mentioned <strong>55 times</strong>. It reminds mankind of their purpose and their Lord. [15:9] <em>"Indeed, it is We who sent down the Reminder, and indeed, it is We who are its Guardian."</em></p></div></div>
+<div class="stage"><div class="stg-n">5</div><div class="stg-c"><h5>Al-Tanzeel (التنزيل) — The Revelation</h5><p>Derivatives appear in <strong>140+ verses</strong>. From <em>nazala</em> — to descend from higher to lower. Proof that Allah is <em>above</em> His creation. [26:192] <em>"And truly, this is a revelation from the Lord of the Worlds."</em></p></div></div>
+</div>
+<div class="tipbox"><b>📝 Note:</b> Imaam az-Zarkashee lists 50+ "names" for the Qur'an — but scholars clarify that most are <em>descriptions and attributes</em>, not actual independent names.</div>
+</div>
+<div class="sec"><h3>The Qur'an Describing Itself</h3>
+<div class="hbox">[10:57] <em>"O mankind! There has come to you good advice from your Lord, and a cure for what is in the breasts, and a guidance and a mercy for the believers."</em></div>
+<div class="hbox">[39:23] <em>"Allah has sent down the Best Statement, a Book, its parts resembling each other in goodness and truth..."</em></div>
+<div class="hbox">[18:1-2] <em>"Praise be to Allah Who has sent down to His servant the Book, and has not placed therein any crookedness..."</em></div>
+</div>
+<div class="sec"><h3>Hadith: Status of the Qur'an</h3>
+<div class="hbox">"The best of you are those who learn the Qur'an and teach it to others."<div class="src">— Ibn Mas'ood | al-Bukhaaree</div></div>
+<div class="hbox">"Allah will raise people by this Book and debase others."<div class="src">— 'Umar ibn al-Khattaab | Muslim</div></div>
+<div class="hbox">"The People of the Qur'an are the People of Allah and His Chosen ones."<div class="src">— Anas ibn Maalik | an-Nasaa'ee</div></div>
+<div class="hbox">"The Qur'an is an intercessor — an intercession that is accepted, and an opponent whose testimony is accepted. Whoever puts it ahead of him, it leads him to Paradise; and whoever throws it behind his back, it drags him to the Fire."<div class="src">— Ibn Mas'ood | at-Tabaraanee</div></div>
+</div>
+<div class="sec"><h3>Rewards for Reciting the Qur'an</h3>
+<div class="hbox">"The one who is proficient with the Qur'an will be with the honorable and obedient angels, and the one who recites it with difficulty, stammering through it, will have a <strong>double reward</strong>."<div class="src">— 'Aa'ishah | Aboo Daawood</div></div>
+<div class="hbox">"Whoever reads one letter from the Book of Allah will have one hasanah, and one hasanah equals ten of its like. I do not say that Alif-Laam-Meem is one letter — rather Alif is a letter, Laam is a letter, and Meem is a letter."<div class="src">— Ibn Mas'ood | at-Tirmidhee</div></div>
+<div class="hbox">When a group gathers to recite the Qur'an: <em>"...tranquility descends upon them, mercy covers them, the angels encircle them, and Allah mentions them to those in His presence."</em><div class="src">— Aboo Hurayrah | Aboo Daawood</div></div>
+<div class="tipbox"><b>🍊 Beautiful Analogy:</b> The believer who recites = citrus fruit (good smell, good taste). The believer who doesn't recite = dry date (no smell, sweet taste). The hypocrite who recites = basil (nice smell, bitter taste). The hypocrite who doesn't recite = colocynth (no smell, bitter taste). <span style="color:var(--muted)">[Aboo Moosaa al-Ash'aree | Muslim]</span></div>
+</div>`},
+
+{id:3,num:"3",title:"Inspiration — al-Wahy",sub:"How Allah communicated with His Prophet",icon:"✨",
+intro:"Wahy (وحي) is the divine system Allah used to communicate with the Prophet ﷺ. Understanding it answers: Did Jibreel just whisper? Did the Prophet see him? How exactly did words travel from Allah to mankind?",
+content:`
+<div class="sec"><h3>What is Wahy?</h3>
+<div class="cbox"><strong>Wahy</strong> linguistically means: to inspire, to communicate <em>secretly and swiftly</em>, not in an obvious manner. It implies urgency, hiddenness, and directness.</div>
+<div class="hbox">[42:51] <em>"It is not possible for any human being that Allah should speak to him except by revelation (wahy), or from behind a veil, or He sends a messenger (angel) who inspires whatever He wills by His permission. Indeed, He is Exalted and Wise."</em><div class="src">— The Primary Verse on Wahy</div></div>
+<p>This verse gives us the <strong>3 ways Allah communicates</strong> with prophets: direct wahy, speech from behind a veil, or through an angel (Jibreel).</p>
+</div>
+<div class="sec"><h3>7 Linguistic Uses of 'Wahy' in the Qur'an</h3>
+<table><tr><th>#</th><th>Type</th><th>Example</th></tr>
+<tr><td>1</td><td>Natural laws of nature</td><td>[41:12] Allah "inspired" the heavens with their commands</td></tr>
+<tr><td>2</td><td>Animal instinct</td><td>[16:68] "Your Lord inspired the bee..."</td></tr>
+<tr><td>3</td><td>Human intuition (ilhaam)</td><td>[28:7] "We inspired the mother of Moosa..."</td></tr>
+<tr><td>4</td><td>Signals/gestures</td><td>[19:11] Zakariyyah communicating through hand signals</td></tr>
+<tr><td>5</td><td>Evil whispers of Shaytaan</td><td>[6:121] "...the devils do inspire their friends..."</td></tr>
+<tr><td>6</td><td>Guidance to angels</td><td>[8:12] "...your Lord inspired the angels..."</td></tr>
+<tr><td>7</td><td>Revelation to Prophets</td><td>[4:163] Main subject of this chapter</td></tr>
+</table>
+</div>
+<div class="sec"><h3>Method A: WITHOUT an Intermediary (Direct from Allah)</h3>
+<h4>1. Through True Dreams</h4>
+<div class="hbox">"The commencement of divine inspiration to the Prophet was in the form of good righteous true dreams in his sleep, like the rising of the sun."<div class="src">— 'Aa'ishah | al-Bukhaaree</div></div>
+<div class="warnbox"><strong>Important:</strong> The Prophet NEVER received Qur'anic verses through dreams — this method predated formal prophethood.</div>
+<h4>2. Direct Speech from Allah</h4>
+<ul>
+<li>Allah spoke directly to Moosa on Mount Toor [7:143]</li>
+<li>Occurred ONCE with the Prophet ﷺ — during al-Israa wa al-Mi'raaj</li>
+<li>The last two verses of Soorah al-Baqarah were revealed this way (strongest opinion)</li>
+</ul>
+<div class="hbox">"The Prophet was given the five prayers, the last verses of al-Baqarah, and remission of serious sins that do not involve shirk." <div class="src">— Sahih Muslim (173) — on what was received at al-Mi'raaj</div></div>
+</div>
+<div class="sec"><h3>Method B: WITH Jibreel as Intermediary (Primary Method)</h3>
+<p>Jibreel was <em>chosen by Allah</em> [26:192-194] to deliver the Qur'an. The chain: <strong>Allah → Jibreel → Prophet ﷺ → Companions → Us</strong></p>
+<div class="hbox">When Allah speaks, the heavens shake severely. The angels fall in swoon. Jibreel is the first to raise his head, then Allah speaks to him with the command. Jibreel then brings it down.<div class="src">— al-Bukhaaree</div></div>
+<div class="tipbox"><b>⚡ Imaam Ahmad's conclusion from this hadith:</b> "Therefore the Qur'an is <strong>uncreated</strong>." — Because it is the direct speech of Allah.</div>
+<h4>How the Prophet Received it from Jibreel — 2 Ways</h4>
+<div class="cbox"><strong>Way 1 — Like the ringing of a bell (hardest):</strong> The Prophet would sweat profusely even on cold nights. When it stopped, he retained every word. [73:5] "We shall send down to you a heavy speech (qawlan thaqeela)."</div>
+<div class="cbox"><strong>Way 2 — Jibreel in the form of a man (easier):</strong> The Prophet retained the words easily. Only the Prophet could see Jibreel — Companions saw only a man.</div>
+<h4>Jibreel in His Natural Form (600 Wings)</h4>
+<p>This occurred only <strong>3 times</strong> with the Prophet ﷺ:</p>
+<ol><li>Cave of Hiraa (first revelation)</li><li>A second time shortly after</li><li>The Night of al-Mi'raaj</li></ol>
+</div>
+<div class="sec"><h3>Ibn al-Qayyim's 7-Type Classification</h3>
+<table><tr><th>#</th><th>Type</th><th>Was Qur'an Revealed This Way?</th></tr>
+<tr><td>1</td><td>True dreams</td><td>❌ No</td></tr>
+<tr><td>2</td><td>Inspiration whispered into heart by angel</td><td>❌ No</td></tr>
+<tr><td>3</td><td>Angel in human form speaking</td><td>✅ Yes</td></tr>
+<tr><td>4</td><td>Like ringing of a bell</td><td>✅ Yes</td></tr>
+<tr><td>5</td><td>Seeing angel in natural form</td><td>✅ Yes</td></tr>
+<tr><td>6</td><td>Direct from Allah above 7 skies (Mi'raaj)</td><td>✅ Yes</td></tr>
+<tr><td>7</td><td>Direct speech as with Moosa</td><td>✅ Yes (last 2 verses of al-Baqarah)</td></tr>
+</table>
+</div>`},
+
+{id:4,num:"4",title:"Gradual Revelation",sub:"Why the Qur'an was revealed over 23 years",icon:"📅",
+intro:"Unlike previous scriptures revealed all at once, the Qur'an came down gradually over 23 years. This was not a limitation — it was a profound divine wisdom with multiple benefits.",
+content:`
+<div class="sec"><h3>The Core Question</h3>
+<div class="cbox">The disbelievers challenged: <strong>"Why is not the Qur'an revealed all at once?"</strong> [25:32]<br><br>Allah answered: <em>"...Thus (it is sent down in parts) that We may <strong>strengthen your heart</strong> thereby. And We have revealed it to you gradually, in stages."</em></div>
+<p>The Qur'an was revealed over <strong>23 years</strong> — 13 years in Makkah and 10 years in Madeenah — in response to real events, questions, and needs of the growing Muslim community.</p>
+</div>
+<div class="sec"><h3>The 3 Stages of Revelation</h3>
+<div class="stages">
+<div class="stage"><div class="stg-n">1</div><div class="stg-c">
+<h5>Stage 1: Written on the Lauh al-Mahfoodh (Preserved Tablet)</h5>
+<p>Before creation itself, Allah recorded all events from the beginning to the Day of Judgement on the Preserved Tablet.</p>
+<div class="hbox">"The first thing Allah created was the Pen. He said: 'Write!' It asked: 'What should I write, O Lord?' He said: 'Write the destiny of all things until the Day of Judgement.'"</div>
+<p>Evidence: [85:21-22] <em>"Nay! This is indeed a Glorious Qur'an! (Inscribed) in the Lauh al-Mahfoodh."</em></p>
+</div></div>
+<div class="stage"><div class="stg-n">2</div><div class="stg-c">
+<h5>Stage 2: From Lauh al-Mahfoodh → Bayt al-'Izza (lowest heaven) — ALL AT ONCE</h5>
+<p>This occurred on <strong>Laylat al-Qadr (Night of Decree)</strong> in the month of <strong>Ramadaan</strong> — the entire Qur'an descended to the "House of Honour" in the lowest heaven, all at once.</p>
+<p>Evidence: [2:185] "The month of Ramadaan is the month in which the Qur'an was revealed..." | [97:1] "We have sent it down in the Night of Decree."</p>
+</div></div>
+<div class="stage"><div class="stg-n">3</div><div class="stg-c">
+<h5>Stage 3: From Bayt al-'Izza → Prophet ﷺ through Jibreel — GRADUALLY over 23 years</h5>
+<p>Jibreel would bring verses in response to events, questions, and circumstances as they arose.</p>
+<p>Evidence: [26:192-194] <em>"And truly this (Qur'an) is a revelation from the Lord of the Worlds, brought down by the trustworthy angel (Jibreel), upon your heart..."</em></p>
+</div></div>
+</div>
+</div>
+<div class="sec"><h3>6 Wisdoms of Gradual Revelation</h3>
+<table><tr><th>#</th><th>Wisdom</th><th>Evidence/Example</th></tr>
+<tr><td>1</td><td><strong>Strengthen the Prophet's resolve</strong></td><td>[25:32, 15:97] Against insults and persecution from disbelievers</td></tr>
+<tr><td>2</td><td><strong>Ease memorization for the Companions</strong></td><td>They received 10 verses at a time, memorized AND acted on them before receiving more</td></tr>
+<tr><td>3</td><td><strong>Prove the Prophet's truthfulness</strong></td><td>Every question from idolaters/People of the Book got a divine answer [25:33]</td></tr>
+<tr><td>4</td><td><strong>Prove its miraculous nature</strong></td><td>6000+ verses over 23 years, zero contradictions [4:82]</td></tr>
+<tr><td>5</td><td><strong>Gradually introduce Islamic law</strong></td><td>'Aa'ishah: "If wine was prohibited first, they would have refused!"</td></tr>
+<tr><td>6</td><td><strong>Ease the revelation process on the Prophet</strong></td><td>He sweated profusely during revelation — gradual meant less overall burden</td></tr>
+</table>
+<div class="hbox">"And all of this only shows the concern, and the high status that was given to the Prophet ﷺ."<div class="src">— Ibn Katheer (d.774 AH)</div></div>
+</div>`},
+
+{id:5,num:"5",title:"First and Last Revelations",sub:"Where the Qur'an began and where it ended",icon:"🔖",
+intro:"The first revelation was the turning point for all of humanity. The last verse sealed a 23-year journey. Scholars examined both carefully, weighing competing narrations.",
+content:`
+<div class="sec"><h3>The First Revelation — 2 Opinions</h3>
+<div class="cbox"><strong>MAJORITY OPINION (Correct):</strong> The first 5 verses of Soorah al-'Alaq [96:1-5]:<br><em>"Read! In the Name of your Lord Who has created (all that exists)..."</em></div>
+<h4>The Story: Cave of Hiraa</h4>
+<p>The Prophet ﷺ was alone in the Cave of Hiraa when Jibreel came suddenly:</p>
+<ol>
+<li>Jibreel commanded: <strong>"Read!"</strong></li>
+<li>The Prophet replied: <strong>"I am not able to read."</strong></li>
+<li>Jibreel embraced and pressed him — THREE times, same reply each time</li>
+<li>Then Jibreel recited [96:1-5] and the Prophet repeated after him</li>
+<li>The Prophet returned to Khadeejah <strong>trembling</strong>, saying: <em>"Cover me! Cover me!"</em></li>
+<li>Khadeejah took him to her cousin <strong>Waraqah ibn Nawfal</strong> (a Christian scholar)</li>
+<li>Waraqah confirmed: <em>"This is the angel that Allah sent to Moosa! If only I were young..."</em></li>
+</ol>
+<div class="cbox"><strong>SECOND OPINION:</strong> Soorah al-Muddathir [74:1] — <em>"O you enveloped (in garments)!"</em><br><br><strong>Reconciliation:</strong> Jaabir ibn 'Abdillaah (who narrated this) was speaking of the first <em>complete soorah</em> revealed — or he only heard the latter part of the story, missing the very beginning.</div>
+</div>
+<div class="sec"><h3>The Last Revelation — 5 Opinions</h3>
+<div class="tipbox"><b>📌 Key Note:</b> No hadith exists where the Prophet explicitly said "this is the FINAL verse I received." So scholars weighed the strongest evidence.</div>
+<table><tr><th>Opinion</th><th>Verse</th><th>Evidence</th><th>Strength</th></tr>
+<tr><td>1 ✅</td><td>2:281 — "And fear the Day on which you will be returned to Allah..."</td><td>Ibn Abbaas in al-Bukhaaree; Prophet lived only <strong>9 nights</strong> after this</td><td>STRONGEST</td></tr>
+<tr><td>2</td><td>2:278 — "Fear Allah and give up what remains of your interest..."</td><td>Another narration from Ibn Abbaas</td><td>Strong</td></tr>
+<tr><td>3</td><td>2:282 — "If you contract a debt for a fixed period, write it down..."</td><td>Sa'eed ibn al-Mussayyib</td><td>Moderate</td></tr>
+<tr><td>4</td><td>Soorah an-Nasr [110] — Last <em>complete soorah</em> revealed</td><td>Ibn Abbaas in Muslim</td><td>Strong (different category)</td></tr>
+<tr><td>5 ❌</td><td>5:3 — "Today I have perfected your religion for you..."</td><td>Commonly believed</td><td>INCORRECT</td></tr>
+</table>
+<div class="warnbox"><strong>Why 5:3 is NOT the last verse:</strong> It was revealed on the <strong>Day of 'Arafah</strong> at the Farewell Pilgrimage — several months BEFORE the Prophet's death. It refers to the completion of halaal/haraam laws, NOT the end of all revelation.</div>
+<div class="hibox"><strong>as-Suyootee's reconciliation of opinions 1-3:</strong> "There is no contradiction — all three were revealed <em>together at the same time</em>." (They are all from the same passage, 2:278-282.)</div>
+</div>`},
+
+{id:6,num:"6",title:"Compilation of the Qur'an",sub:"Three stages of preservation — from memory to standard text",icon:"📜",
+intro:"No other religious book in history has been preserved with the care and rigor applied to the Qur'an. Its compilation unfolded in three distinct historical stages, each addressing a specific need.",
+content:`
+<div class="sec"><h3>Allah's Promise of Preservation</h3>
+<div class="hbox">[15:9] <em>"Indeed, it is We who sent down the Reminder (Dhikr), and indeed, it is We who are its Guardian."</em></div>
+<p>This was not just a promise — it was fulfilled through three precise historical stages.</p>
+</div>
+<div class="sec"><h3>Stage 1: During the Prophet's Lifetime ﷺ</h3>
+<h4>Memorization</h4>
+<p>Famous memorizers among the Companions included: Aboo Bakr, 'Umar, 'Uthmaan, 'Alee, Ibn Mas'ood, Ibn 'Amr, Ibn 'Abbaas, Ubay ibn Ka'ab, Mu'aadh ibn Jabal, Zayd ibn Thaabit.</p>
+<h4>Writing</h4>
+<p>The Prophet ﷺ dictated to designated scribes. Materials used: <em>shoulder bones, smooth stones, date-palm leaves, saddles, leather</em>.</p>
+<div class="hbox">"We used to compile the Qur'an from scraps of leather."<div class="src">— Zayd ibn Thaabit</div></div>
+<h4>Why NOT compiled into one book during the Prophet's lifetime? (4 Reasons)</h4>
+<ol>
+<li>No pressing need — memory was sufficient and reliable</li>
+<li>Revelation was still <em>continuing</em> (last verse came only 9 days before his death)</li>
+<li>Arrangement was non-chronological (required divine guidance)</li>
+<li>Some revelations were still being abrogated</li>
+</ol>
+</div>
+<div class="sec"><h3>Stage 2: Aboo Bakr's Compilation (12 AH)</h3>
+<div class="cbox"><strong>The Trigger:</strong> At the <strong>Battle of Yamaamah</strong>, approximately <strong>70 huffaadh (memorizers)</strong> were martyred. 'Umar became alarmed: <em>"What if more memorizers die?"</em></div>
+<h4>The Process</h4>
+<ul>
+<li>'Umar urged Aboo Bakr to compile. Aboo Bakr hesitated: <em>"How can I do what the Prophet did not do?"</em></li>
+<li>'Umar convinced him: this is <em>maslaha</em> (public benefit), not <em>bid'ah</em> (forbidden innovation)</li>
+<li><strong>Zayd ibn Thaabit</strong> was appointed as compiler — he set strict criteria:</li>
+</ul>
+<div class="hibox"><strong>Zayd's Double-Verification Rule:</strong> Required <em>at least 2 people</em> who learned directly from the Prophet + <em>at least 1 written copy</em> supervised by the Prophet.</div>
+<ul>
+<li>'Umar stood in the mosque: <em>"Whoever has learnt any Qur'an from the Prophet, bring it forth."</em></li>
+<li>The result: the first complete mus-haf, kept with Aboo Bakr → 'Umar → <strong>Hafsah</strong> (daughter of 'Umar)</li>
+</ul>
+<div class="hbox">"The person with the greatest rewards regarding the mus-haf is Aboo Bakr."<div class="src">— 'Alee ibn Abee Taalib</div></div>
+</div>
+<div class="sec"><h3>Stage 3: 'Uthmaan's Standardization (24-25 AH)</h3>
+<div class="cbox"><strong>The Trigger:</strong> Muslims in Armenia and Azerbaijan were fighting over their recitations. Syrians recited differently from Iraqis. Arguments broke out — some even said "My recitation is better than yours!"</div>
+<div class="hbox">"Save this ummah before it disagrees about its Book like the Jews and Christians did!"<div class="src">— Hudhayfah ibn al-Yamaan, to 'Uthmaan</div></div>
+<h4>'Uthmaan's Solution: 4-Man Committee</h4>
+<ol>
+<li>Zayd ibn Thaabit (main compiler)</li>
+<li>'Abdullaah ibn az-Zubayr</li>
+<li>Sa'eed ibn al-'Aas</li>
+<li>'Abd al-Rahmaan ibn al-Haarith</li>
+</ol>
+<p><strong>Instruction:</strong> "If you differ in spelling, use the dialect of <strong>Quraysh</strong> — for the Qur'an was revealed in their tongue."</p>
+<h4>Copies Distributed to Provinces</h4>
+<table><tr><th>Province</th><th>Reciter Sent With It</th></tr>
+<tr><td>Madeenah</td><td>Zayd ibn Thaabit</td></tr>
+<tr><td>Makkah</td><td>'Abdullaah ibn Saa'ib</td></tr>
+<tr><td>Syria</td><td>al-Mugheerah ibn Shu'bah</td></tr>
+<tr><td>Koofah</td><td>Aboo 'Abd ar-Rahmaan as-Sulamee</td></tr>
+<tr><td>Basrah</td><td>Aamir ibn 'Abd al-Qays</td></tr>
+</table>
+<p>All other non-standard copies were destroyed. This unified the ummah on one reading.</p>
+<div class="hbox">"If I were in charge when 'Uthmaan had been, I would have done the same."<div class="src">— 'Alee ibn Abee Taalib</div></div>
+<div class="tipbox"><b>📌 Ibn Taymiyyah's summary:</b> The final recitation = Zayd ibn Thaabit's recitation; recited to Jibreel in the last year of the Prophet's life; Aboo Bakr was first to compile it; 'Uthmaan standardized and distributed it with the Companions' approval.</div>
+</div>`},
+
+{id:8,num:"7",title:"The Ahruf of the Qur'an",sub:"Why the Qur'an was revealed in 7 modes",icon:"🔤",
+intro:"The Qur'an was revealed in 7 ahruf (modes/forms). This was a mercy from Allah — making recitation accessible to people of different dialects. Understanding this resolves confusion about 'different versions.'",
+content:`
+<div class="sec"><h3>What are the Ahruf?</h3>
+<div class="cbox"><strong>Ahruf</strong> (singular: <em>harf</em>) — the various ways certain verses of the Qur'an can validly be read. <strong>NOT</strong> different Qur'ans, NOT different meanings — rather different valid pronunciations and word choices for the same revelation.<br><br>Imaam al-Qurtubee: <em>"Every variation of a word in the Qur'an is a harf."</em></div>
+</div>
+<div class="sec"><h3>3 Hadith Proving the Qur'an Was Revealed in 7 Ahruf</h3>
+<div class="hbox"><strong>Hadith 1:</strong> Ibn Abbaas narrated: Jibreel recited the Qur'an to me in one harf. I asked him to increase. He increased until we reached seven ahruf. Ibn Shihaab az-Zuhree added: <em>"These seven ahruf are essentially one in meaning; they do not differ about what is permitted or what is forbidden."</em><div class="src">al-Bukhaaree and Muslim</div></div>
+<div class="hbox"><strong>Hadith 2:</strong> 'Umar heard Hishaam ibn Hakeem reciting Soorah al-Furqaan differently from how the Prophet taught <em>him</em>. 'Umar grabbed Hishaam and brought him to the Prophet. The Prophet listened to BOTH and said: <em>"Both are correct. The Qur'an has been revealed in seven different ahruf — so recite whichever is easy for you."</em><div class="src">al-Bukhaaree and Muslim</div></div>
+<div class="hbox"><strong>Hadith 3:</strong> Ubay ibn Ka'ab reported the Prophet said: <em>"I have been sent to an illiterate nation... among them are those who have never read any writing!"</em> Jibreel answered: <em>"The Qur'an has been revealed in seven ahruf."</em><div class="src">at-Tirmidhee</div></div>
+</div>
+<div class="sec"><h3>4 Key Conclusions from These Narrations</h3>
+<ol>
+<li>The different ahruf are <strong>directly from Allah</strong> — not from the Companions</li>
+<li>Multiple ahruf were given to <strong>ease memorization and recitation</strong> for the ummah</li>
+<li>The Prophet taught <strong>different ahruf to different Companions</strong> based on their needs</li>
+<li>Each harf is <strong>complete and valid in and of itself</strong></li>
+</ol>
+</div>
+<div class="sec"><h3>What Do the 7 Ahruf Actually Mean? (Strongest Opinion)</h3>
+<p>There are many scholarly opinions. The <strong>strongest</strong> (held by Ibn Qutaybah, al-Baaqillaanee, Ibn al-Jazaree) is that the 7 ahruf represent <strong>7 types/categories of variation</strong>:</p>
+<table><tr><th>#</th><th>Type of Variation</th><th>Example</th></tr>
+<tr><td>1</td><td>Change in wording (different roots/words)</td><td>Synonymous words allowed</td></tr>
+<tr><td>2</td><td>Differences in letters (within Uthmaanic script)</td><td><em>maaliki / maliki</em> in al-Faatihah 1:4</td></tr>
+<tr><td>3</td><td>Change in word order</td><td>[3:195] different arrangements</td></tr>
+<tr><td>4</td><td>Addition or subtraction of a letter/word</td><td>[57:24] variations</td></tr>
+<tr><td>5</td><td>Form/structure change (plural/singular, gender)</td><td>[23:8] variations</td></tr>
+<tr><td>6</td><td>Differences in inflection points</td><td>[2:125] variations</td></tr>
+<tr><td>7</td><td>Differences in pronunciation (tashheel, imaalah)</td><td>Accent/phonetic variations</td></tr>
+</table>
+<div class="tipbox"><b>📌 Ibn al-Jazaree's conclusion:</b> "The Uthmaanic mus-hafs contain all seven ahruf — not a single letter is missing." The 10 authentic qira'aat together express all variations of the 7 ahruf.</div>
+</div>`},
+
+{id:9,num:"8",title:"The Qira'at of the Qur'an",sub:"The 10 authentic modes of recitation",icon:"🎙️",
+intro:"The qira'at are the 10 authenticated systems of reciting the Qur'an, each named after a master reciter with an unbroken chain back to the Prophet ﷺ. They are not different Qur'ans — they are preserved variations within the ahruf.",
+content:`
+<div class="sec"><h3>What are the Qira'at?</h3>
+<div class="cbox"><strong>Qiraa'at</strong> (singular: <em>qiraa'a</em>): The various authenticated ways of reciting the Qur'an. Each qiraa'a has its own tajweed rules and is named after a master <em>Qaaree</em> (reciter). Each Qaaree has 2 main students called <em>Raawis</em>.<br><br><em>"The recitation of the Qur'an is a Sunnah; the later generations must take it from the earlier ones."</em> — 'Umar ibn al-Khattaab</div>
+</div>
+<div class="sec"><h3>3 Conditions for an Authentic Qiraa'a (Ibn al-Jazaree, d.832 AH)</h3>
+<ol>
+<li>Conforms to the rules of <strong>Arabic grammar</strong></li>
+<li>Matches at least one of the <strong>Uthmaanic mus-hafs</strong></li>
+<li>Has an <strong>authentic mutawaatir chain</strong> of narrators back to the Prophet ﷺ</li>
+</ol>
+<p>All 3 conditions must be met. If any one is missing, the reading is NOT a valid qiraa'a.</p>
+</div>
+<div class="sec"><h3>4 Types of Qira'at</h3>
+<table><tr><th>Type</th><th>Meets Which Conditions</th><th>Status</th></tr>
+<tr><td><strong>Saheeh</strong> (Authentic)</td><td>All 3</td><td>✅ Valid — this is Qur'an</td></tr>
+<tr><td><strong>Shaadh</strong> (Irregular)</td><td>Grammar + Chain — but NOT Uthmaanic script; NOT mutawaatir</td><td>❌ NOT Qur'an; may be studied as tafseer</td></tr>
+<tr><td><strong>Da'eef</strong> (Weak)</td><td>Grammar + Uthmaanic script — but NO authentic chain</td><td>❌ NOT Qur'an</td></tr>
+<tr><td><strong>Baatil</strong> (False)</td><td>None</td><td>❌ NOT Qur'an — completely rejected</td></tr>
+</table>
+<div class="warnbox"><strong>Ruling:</strong> It is <strong>haraam</strong> to treat Shaadh, Da'eef, or Baatil readings as Qur'an. Prayer with such readings is <strong>invalid</strong>.</div>
+</div>
+<div class="sec"><h3>The 10 Authentic Qaarees</h3>
+<table><tr><th>Qaaree</th><th>City</th><th>Died</th><th>Key Raawi</th></tr>
+<tr><td>1. Naafi' al-Madanee</td><td>Madeenah</td><td>169 AH</td><td>Qaloon, <strong>Warsh</strong></td></tr>
+<tr><td>2. Ibn Katheer al-Makkee</td><td>Makkah</td><td>120 AH</td><td>al-Buzzee, Qumbul</td></tr>
+<tr><td>3. Aboo 'Amr al-Basree</td><td>Basrah</td><td>154 AH</td><td>ad-Dooree, as-Soosee</td></tr>
+<tr><td>4. Ibn 'Aamir ash-Shaamee</td><td>Damascus</td><td>118 AH</td><td>Hishaam, Ibn Dhakwaan</td></tr>
+<tr><td>5. 'Aasim al-Koofee</td><td>Koofah</td><td>127 AH</td><td>Shu'ba, <strong>Hafs</strong></td></tr>
+<tr><td>6. Hamzah al-Koofee</td><td>Koofah</td><td>156 AH</td><td>Khalaf, Khallaad</td></tr>
+<tr><td>7. al-Kisaa'ee</td><td>Baghdad</td><td>189 AH</td><td>al-Layth, ad-Dooree</td></tr>
+<tr><td>8. Aboo Jaa'far al-Madanee</td><td>Madeenah</td><td>130 AH</td><td>Ibn Wardaan, Ibn Jammaaz</td></tr>
+<tr><td>9. Ya'qoob al-Basree</td><td>Basrah</td><td>205 AH</td><td>Ruways, Rooh</td></tr>
+<tr><td>10. Khalaf al-'Aashir</td><td>Baghdad</td><td>229 AH</td><td>Ishaaq, Idrees</td></tr>
+</table>
+<div class="tipbox"><b>🌍 Distribution Today:</b> <strong>Hafs 'an 'Aasim</strong> (~95% of Muslim world) | <strong>Warsh 'an Naafi'</strong> (~3% — Algeria, Morocco, West Africa) | <strong>Qaloon 'an Naafi'</strong> (~0.7% — Libya, Tunisia) | <strong>Ibn 'Aamir</strong> (~1% — parts of Yemen)</div>
+</div>
+<div class="sec"><h3>Example: How Different Qira'at Add Meaning</h3>
+<div class="cbox"><strong>Al-Faatihah 1:4</strong><br>• <em>Maaliki</em> (Owner) — Naafi', Ibn Katheer<br>• <em>Maliki</em> (King) — 'Aasim, others<br>Together they give us: Allah is both the King AND the Owner of the Day of Judgement.</div>
+<div class="cbox"><strong>Ablution verse — Al-Maa'idah 5:6</strong><br>• <em>Arjulakum</em> (accusative) → wash your feet<br>• <em>Arjulikum</em> (genitive) → wipe over your feet<br>No contradiction! One applies when wearing leather socks (wipe), the other for bare feet (wash).</div>
+</div>
+<div class="sec"><h3>5 Benefits of the Different Qira'at</h3>
+<ol>
+<li>Facilitation of memorization for different peoples</li>
+<li>Proof the Qur'an is from Allah — thousands of variations, none contradictory</li>
+<li>Proof of exact preservation — all chains are mutawaatir</li>
+<li>Indication of miraculous nature — adds layers of meaning</li>
+<li>Removes stagnation — the sacred text remains vibrant</li>
+</ol>
+</div>`},
+
+{id:10,num:"9",title:"The Makkee and the Madanee",sub:"Classifying verses before and after the Hijrah",icon:"🕌",
+intro:"The Qur'an was revealed over two distinct phases: Makkah (13 years) and Madeenah (10 years). Each phase addressed different needs — building faith first, then establishing society.",
+content:`
+<div class="sec"><h3>3 Definitions — Which is Correct?</h3>
+<table><tr><th>Definition</th><th>Makkee</th><th>Madanee</th><th>Problem?</th></tr>
+<tr><td>1 ✅ <strong>TIME-BASED (Strongest)</strong></td><td>Revealed BEFORE the Hijrah</td><td>Revealed AFTER the Hijrah</td><td>None — covers all cases</td></tr>
+<tr><td>2 — Place-based</td><td>Revealed IN Makkah</td><td>Revealed IN Madeenah</td><td>Can't classify verses revealed elsewhere (Tabook, Jerusalem, etc.)</td></tr>
+<tr><td>3 — Addressee-based</td><td>Addresses Quraysh/polytheists</td><td>Addresses Muslims/hypocrites</td><td>Many verses address all mankind or People of the Book</td></tr>
+</table>
+<div class="hibox"><strong>Practical Example of Definition 1:</strong> The verse 5:3 ("Today I have perfected your religion...") was revealed during the Farewell Pilgrimage <em>in Makkah</em> but is classified as <strong>MADANEE</strong> — because it was revealed AFTER the Hijrah.</div>
+</div>
+<div class="sec"><h3>Themes of MAKKEE Soorahs</h3>
+<ol>
+<li><strong>Pure Tawheed</strong> — affirming Allah's Names and Attributes, rejecting false deities</li>
+<li><strong>Core beliefs ('Aqeedah)</strong> — prophethood, angels, scriptures, Day of Judgement, Heaven and Hell</li>
+<li><strong>Morality and character</strong> — broad principles: care for orphans, no female infanticide; <em>no specific legal rulings yet</em></li>
+<li><strong>Stories of previous nations</strong> — encouragement for the believers, warnings for the disbelievers</li>
+</ol>
+</div>
+<div class="sec"><h3>Themes of MADANEE Soorahs</h3>
+<ol>
+<li><strong>Detailed worship laws</strong> — prayer, zakaah, fasting, pilgrimage specifics</li>
+<li><strong>System of laws</strong> — jihaad, marriage, inheritance, governance, hudood punishments</li>
+<li><strong>Dialogue with Jews and Christians</strong> — exposing corruption in their books, clarifying truth</li>
+<li><strong>Exposing hypocrites</strong> — hypocrisy was a Madeenah phenomenon (they pretended to be Muslim)</li>
+</ol>
+</div>
+<div class="sec"><h3>Quick Identification Rules</h3>
+<h4>A verse/soorah is MAKKEE if it has:</h4>
+<ul>
+<li>The word <em>"Kalaa"</em> (Nay!) — appears in 15+ soorahs, all Makkee</li>
+<li>Disjointed letters (Alif-Lam-Meem, Ha-Meem, etc.) — ALL Makkee EXCEPT al-Baqarah and Aali-'Imraan</li>
+<li>A verse of prostration (<em>sajdah at-tilaawah</em>) — ALL Makkee</li>
+<li>Stories of previous prophets and creation of Aadam — ALL Makkee EXCEPT al-Baqarah</li>
+<li>Short, concise verses with strong words and frequent oaths</li>
+</ul>
+<h4>A verse/soorah is MADANEE if it has:</h4>
+<ul>
+<li>Mention of <em>hudood</em> (prescribed punishments)</li>
+<li>Mention of hypocrites — ALL Madanee EXCEPT Soorah al-'Ankaboot</li>
+<li>Address to Jews and/or Christians</li>
+<li>Mention of jihaad (in the fighting sense)</li>
+<li>Generally longer verses</li>
+</ul>
+<div class="cbox"><strong>Classification of all 114 Soorahs:</strong><br>• <strong>Makkee:</strong> 82 soorahs<br>• <strong>Madanee:</strong> 20 soorahs<br>• <strong>Disputed:</strong> 12 soorahs (including al-Faatihah, al-Ikhlaas, al-Falaq, an-Naas)</div>
+</div>
+<div class="sec"><h3>6 Benefits of Knowing Makkee and Madanee</h3>
+<ol>
+<li><strong>Essential for proper tafseer</strong> — you can't interpret without knowing the context</li>
+<li><strong>Helps identify abrogated verses</strong> — Madanee takes precedence when there is conflict</li>
+<li><strong>Insight into the Prophet's life</strong> — Makkee: patience under persecution; Madanee: beware of hypocrites</li>
+<li><strong>Shows gradual introduction of Sharee'ah</strong> — 'Aqeedah first, then laws</li>
+<li><strong>Methodology for da'wah</strong> — always begin with Tawheed before laws</li>
+<li><strong>Proves the detail in preserving the Qur'an</strong></li>
+</ol>
+</div>`},
+
+{id:11,num:"10",title:"Causes of Revelation",sub:"Asbaab an-Nuzool — why specific verses were sent down",icon:"🔍",
+intro:"Asbaab an-Nuzool (أسباب النزول) are the specific events that directly caused particular verses to be revealed. Knowing them prevents misapplication and unlocks deeper understanding.",
+content:`
+<div class="sec"><h3>What is Sabab an-Nuzool?</h3>
+<div class="cbox"><strong>Sabab an-Nuzool</strong> (plural: <em>asbaab an-nuzool</em>): A specific event or question that was the <em>direct, immediate cause</em> of a particular verse being revealed.<br><br><strong>Two requirements:</strong><ol><li>Must be a specific incident or question</li><li>Must have occurred <em>shortly before</em> the revelation</li></ol></div>
+<div class="tipbox"><b>📌 Important:</b> MOST of the Qur'an was revealed WITHOUT a specific asbaab an-nuzool. Allah revealed guidance proactively — not only in response to events.</div>
+<div class="warnbox"><strong>What is NOT a sabab an-nuzool:</strong><br>• Stories of previous nations<br>• Knowledge of the unseen<br>• Events that occurred long before (e.g., Abrahah's attack on the Ka'bah is NOT the sabab for Soorah al-Feel — it happened years earlier)</div>
+</div>
+<div class="sec"><h3>Sources of Asbaab an-Nuzool</h3>
+<p><strong>Primary:</strong> Hadith from the Prophet ﷺ<br><strong>Secondary:</strong> Statements from Companions (who witnessed the revelations)</p>
+<div class="hbox">"It is not permitted to speak about asbaab an-nuzool except by transmitting reports from those who witnessed the revelation and were present when it occurred."<div class="src">— al-Waahidee (d.487 AH)</div></div>
+<p>Successors (tabi'een) known for accuracy in tafseer may also be accepted: Mujaahid ibn Jabr (d.103 AH), 'Ikrimah (d.104 AH), Sa'eed ibn Jubayr (d.95 AH), Qataadah as-Sadoosee (d.110 AH).</p>
+</div>
+<div class="sec"><h3>4 Rules: When Multiple Causes Exist for One Verse</h3>
+<table><tr><th>Situation</th><th>Rule</th><th>Example</th></tr>
+<tr><td>One weak + one authentic</td><td>Accept authentic, reject weak</td><td>Soorah ad-Duhaa: Accept 'Aa'ishah's narration (al-Bukhaaree), reject the weak one about a puppy</td></tr>
+<tr><td>Both authentic — one more explicit</td><td>Accept the more explicit one</td><td>2:223: Accept Jaabir's explicit narration over Ibn 'Umar's ambiguous one</td></tr>
+<tr><td>Both authentic and equal</td><td>Both may have been simultaneously applicable</td><td>Verses of li'aan (24:6): Two cases brought at the same time</td></tr>
+<tr><td>Both authentic, different timeframes</td><td>Verse may have been revealed MORE THAN ONCE</td><td>9:113: Revealed about three separate incidents involving prayer for polytheists</td></tr>
+</table>
+</div>
+<div class="sec"><h3>Famous Examples</h3>
+<h4>'Umar's 3 "Agreements with His Lord"</h4>
+<ul>
+<li>[2:125] — 'Umar suggested making Maqaam Ibrahim a place of prayer → verse was revealed confirming it</li>
+<li>[33:53] — 'Umar suggested the Prophet's wives wear hijab → verse revealed</li>
+<li>[66:5] — 'Umar warned the Prophet's wives → verse revealed</li>
+</ul>
+<h4>Sa'd ibn Abee Waqqaas — 4 Verses About Him</h4>
+<ol>
+<li>His mother's hunger strike (to make him leave Islam) → [31:15]</li>
+<li>First Muslim to draw a sword; dispute over war booty → [8:1]</li>
+<li>His illness and question about bequests → bequest verse</li>
+<li>His drinking habit → wine prohibition verse</li>
+</ol>
+</div>
+<div class="sec"><h3>The Key Principle (Most Important!)</h3>
+<div class="hibox"><strong>MAJORITY VIEW (Correct):</strong><br><em>"The consideration for a ruling comes from the <strong>GENERALITY OF THE WORDING</strong>, not the specificity of its circumstance of revelation."</em><br><br>This means: even if a verse was revealed for ONE specific event, its ruling applies to ALL similar situations.</div>
+<div class="cbox"><strong>Example:</strong> [59:7] "Whatever the Messenger gives you, take it..." — revealed specifically about war booty, but applies to <em>ALL</em> commands of the Prophet ﷺ. Ibn Mas'ood confirmed this applies even to prohibitions like eyebrow plucking.</div>
+<div class="cbox"><strong>Another Example:</strong> [11:114] "Establish prayer at the two ends of the day..." — A man asked if this verse only applied to him after he kissed a non-mahram woman. The Prophet replied: <em>"No, for all of mankind."</em></div>
+</div>
+<div class="sec"><h3>4 Benefits of Knowing Asbaab an-Nuzool</h3>
+<ol>
+<li><strong>Removes misinterpretations</strong> — context prevents wrong application of verses</li>
+<li><strong>Deepens understanding</strong> — knowing what prompted a verse makes it more meaningful</li>
+<li><strong>Clarifies scope</strong> — when general or specific application is intended</li>
+<li><strong>Reveals context of revelation</strong> — honor for a Companion (like 'Umar) or eternal disgrace for a disbeliever (like Aboo Lahab [111:1])</li>
+</ol>
+</div>`}
+];
+const QUIZZES={
+1:[
+{q:"What does 'Uloom al-Qur'an literally mean?",opts:["The Laws of the Qur'an","The Sciences of the Qur'an","The Interpretation of the Qur'an","The History of the Qur'an"],ans:1,exp:"'Uloom al-Qur'an = علوم القرآن = The Sciences of the Qur'an — a collective term for all Islamic sciences relating to the Qur'an."},
+{q:"Which of the following is NOT a subject covered by 'Uloom al-Qur'an?",opts:["The methods of Wahy","The compilation of the Qur'an","Islamic jurisprudence (Fiqh)","Makkee and Madanee verses"],ans:2,exp:"Fiqh (Islamic jurisprudence) is a separate discipline. 'Uloom al-Qur'an covers sciences about the Qur'an itself — its revelation, preservation, recitation, and context."},
+{q:"Who wrote the famous reference book 'al-Burhan fi 'Uloom al-Qur'an'?",opts:["as-Suyootee","Imaam az-Zarkashee","Ibn Taymiyyah","Ibn Katheer"],ans:1,exp:"Imaam az-Zarkashee (d.794 AH) wrote al-Burhan fi 'Uloom al-Qur'an. as-Suyootee (d.911 AH) wrote al-Itqan — the other major reference."},
+{q:"Who wrote 'al-Itqan fi 'Uloom al-Qur'an'?",opts:["Imaam az-Zarkashee","Imaam al-Bukhaaree","as-Suyootee","Ibn Khuzaymah"],ans:2,exp:"Jalaal ad-Deen as-Suyootee (d.911 AH) wrote al-Itqan fi 'Uloom al-Qur'an — the most comprehensive classical work on the subject."},
+{q:"True or False: The study of 'Uloom al-Qur'an began during the time of the Companions.",opts:["True","False"],ans:0,exp:"True — the Companions practiced these sciences naturally. They witnessed revelations firsthand and knew the context of every verse."},
+{q:"Who wrote the FIRST dedicated book on the causes of revelation (Asbaab an-Nuzool)?",opts:["al-Waahidee","as-Suyootee","'Alee al-Madeenee (teacher of al-Bukhaaree)","Ibn Hajr al-'Asqalaanee"],ans:2,exp:"'Alee al-Madeenee (d.234 AH), the teacher of Imaam al-Bukhaaree, wrote the first dedicated book on this topic."},
+{q:"Ibn Taymiyyah said: 'Knowledge of the causes of revelation produces...'",opts:["knowledge of Arabic grammar","knowledge of its correct application","a stronger memory","knowledge of abrogated verses"],ans:1,exp:"Ibn Taymiyyah's full statement: 'Knowledge of its cause of revelation produces knowledge of its application.' Context determines correct use."},
+{q:"Which science determines WHEN (before or after Hijrah) a verse was revealed?",opts:["Asbaab an-Nuzool","al-Qira'at","Makkee and Madanee","al-Ahruf"],ans:2,exp:"The science of Makkee and Madanee classifies verses as either revealed before the Hijrah (Makkee) or after the Hijrah (Madanee)."},
+{q:"True or False: 'Uloom al-Qur'an includes the study of how the Qur'an was preserved and compiled.",opts:["True","False"],ans:0,exp:"True — the Compilation of the Qur'an is one of the core subjects of 'Uloom al-Qur'an."},
+{q:"What did al-Waahidee say about understanding a verse without knowing its context?",opts:["It is permitted if you know Arabic well","It is impossible to properly interpret it","It is encouraged for independent thinking","It is optional for scholars"],ans:1,exp:"al-Waahidee (d.487 AH) stated: 'It is impossible to properly interpret a verse without reflecting over its sabab an-nuzool (context/cause of revelation).'"}
+],
+2:[
+{q:"How many times is the name 'Al-Kitab' (The Book) mentioned in the Qur'an?",opts:["44","55","77","140"],ans:2,exp:"Al-Kitab is mentioned 77 times in the Qur'an, emphasising the Qur'an's written preservation."},
+{q:"What does the name 'Al-Furqaan' mean?",opts:["The Reminder","The Revelation","The Criterion","The Book"],ans:2,exp:"Al-Furqaan means The Criterion — distinguishing truth from falsehood, good from evil, tawheed from shirk."},
+{q:"What is the KEY difference between 'Al-Qur'an' and 'Al-Kitab' as names?",opts:["One is Arabic, one is Persian","Qur'an = preserved in hearts; Kitab = preserved in writing","They mean exactly the same thing","Kitab was the first name given"],ans:1,exp:"Qur'an (from qara'a = to recite) emphasises oral preservation in the hearts of believers. Kitab (from kataba = to write) emphasises written preservation."},
+{q:"How many times is 'Al-Dhikr' (Remembrance) mentioned in the Qur'an?",opts:["4","55","77","140"],ans:1,exp:"Al-Dhikr is mentioned 55 times. Al-Furqaan is mentioned 4 times. Al-Kitab is 77 times."},
+{q:"According to a hadith, someone who recites the Qur'an with difficulty gets:",opts:["No reward","Half the reward of a proficient reciter","The same reward","Double the reward"],ans:3,exp:"'Aa'ishah narrated: the one who recites with difficulty, stammering through it, will have a DOUBLE reward — one for reciting, one for the effort. (Aboo Daawood)"},
+{q:"Who said: 'Allah will raise people by this Book and debase others'?",opts:["Aboo Bakr","'Umar ibn al-Khattaab","'Ali ibn Abi Taalib","Ibn Mas'ood"],ans:1,exp:"This statement was made by 'Umar ibn al-Khattaab and reported in Muslim."},
+{q:"How many primary names of the Qur'an does this chapter focus on?",opts:["3","4","5","7"],ans:2,exp:"The chapter focuses on 5 primary names: Al-Qur'an, Al-Kitab, Al-Furqaan, Al-Dhikr, and Al-Tanzeel."},
+{q:"True or False: 'Al-Furqaan' is mentioned 77 times in the Qur'an.",opts:["True","False"],ans:1,exp:"False — Al-Furqaan is mentioned only 4 times. Al-Kitab is mentioned 77 times."},
+{q:"When a group gathers in a house of Allah to recite the Qur'an, what happens according to the hadith?",opts:["Rain comes down from heaven","Tranquility descends, mercy covers, angels encircle, Allah mentions them","Their sins are immediately forgiven","The angels write their names in gold"],ans:1,exp:"Aboo Hurayrah narrated: tranquility descends upon them, mercy covers them, the angels encircle them, and Allah mentions them to those in His presence. (Aboo Daawood)"},
+{q:"How many derivatives of 'Al-Tanzeel' appear in the Qur'an?",opts:["4","55","77","Over 140"],ans:3,exp:"Derivatives of Al-Tanzeel appear in over 140 verses, making it one of the most frequent references to the Qur'an's divine origin."}
+],
+3:[
+{q:"What is the linguistic meaning of 'Wahy'?",opts:["To speak loudly and publicly","To inspire and communicate secretly and swiftly","To write down a message","To reveal only through dreams"],ans:1,exp:"Wahy linguistically means to inspire, to communicate secretly and not obviously, to another person, in a swift manner."},
+{q:"How many linguistic uses of 'Wahy' appear in the Qur'an?",opts:["3","5","7","10"],ans:2,exp:"The Qur'an uses the concept of 'wahy' in 7 different ways: natural laws, animal instinct, human intuition, signals, evil whispers, guidance to angels, and revelation to prophets."},
+{q:"Which verse is called the 'Primary Verse on Wahy' in this chapter?",opts:["4:163","2:38","42:51","26:192"],ans:2,exp:"[42:51] 'It is not possible for any human being that Allah should speak to him except by revelation (wahy), or from behind a veil, or He sends a messenger...' — this describes the 3 methods."},
+{q:"True or False: The Prophet ﷺ received Qur'anic verses through dreams.",opts:["True","False"],ans:1,exp:"False — The Prophet NEVER received Qur'anic verses through dreams. Dreams preceded formal prophethood but were NOT the method of Qur'anic revelation."},
+{q:"How many times did Jibreel appear to the Prophet in his NATURAL form (with 600 wings)?",opts:["Once","Twice","Three times","Never"],ans:2,exp:"Jibreel appeared in his natural form 3 times: at Cave of Hiraa (first revelation), a second time shortly after, and on the Night of al-Mi'raaj."},
+{q:"According to hadith, which form of wahy was the HARDEST on the Prophet?",opts:["When Jibreel appeared as a man","Through dreams","Like the ringing of a bell","Direct speech from Allah"],ans:2,exp:"The Prophet said the ringing-of-a-bell form was 'the hardest for me' — he would sweat profusely even on cold days. [73:5] refers to it as 'heavy speech'."},
+{q:"According to the strongest opinion, how were the last two verses of Soorah al-Baqarah revealed?",opts:["Through Jibreel in human form","As a direct gift at al-Israa wa al-Mi'raaj","Through true dreams","Through the ringing of a bell"],ans:1,exp:"Sahih Muslim (173): 'The Prophet was given the five prayers, the last verses of al-Baqarah, and remission of serious sins...' — these were gifts at al-Mi'raaj, direct from Allah."},
+{q:"True or False: Evil whispers of Shaytaan are also called 'wahy' in the Qur'an.",opts:["True","False"],ans:0,exp:"True — [6:121] 'the devils do inspire (yoohoon) their friends...' The word is from the same root as wahy, used here for Shaytaan's whispers — one of the 7 linguistic uses."},
+{q:"Imaam Ahmad concluded from the hadith about Jibreel receiving revelation: 'Therefore the Qur'an is...'",opts:["the speech of Jibreel","created by Allah","uncreated","preserved by men"],ans:2,exp:"Since the Qur'an is the direct speech of Allah heard by Jibreel from Allah Himself, Imaam Ahmad concluded: 'Therefore the Qur'an is uncreated' — it is Allah's attribute, not a created thing."},
+{q:"What is the chain for the Qur'an reaching mankind?",opts:["Prophet → Jibreel → Allah → Companions","Allah → Companions → Prophet","Allah → Jibreel → Prophet → Companions","Jibreel → Allah → Prophet → Companions"],ans:2,exp:"The correct chain: Allah spoke to Jibreel → Jibreel delivered to the Prophet ﷺ → the Prophet taught the Companions → they transmitted to us."}
+],
+4:[
+{q:"Over how many years was the Qur'an revealed to the Prophet?",opts:["10 years","15 years","23 years","40 years"],ans:2,exp:"The Qur'an was revealed over 23 years: 13 years in Makkah and 10 years in Madeenah."},
+{q:"In which STAGE was the Qur'an first recorded on the Lauh al-Mahfoodh?",opts:["Third stage","Second stage","First stage","It was never on the Lauh al-Mahfoodh"],ans:2,exp:"The First Stage — before creation, Allah recorded all events including the Qur'an on the Preserved Tablet (Lauh al-Mahfoodh)."},
+{q:"On which night was the ENTIRE Qur'an sent from the Lauh al-Mahfoodh to Bayt al-'Izza?",opts:["Laylat al-Miraj","Laylat al-Qadr","Laylat al-Bara'ah","Laylat al-Raghaib"],ans:1,exp:"Laylat al-Qadr (the Night of Decree) in Ramadaan. Evidence: [97:1] 'We have sent it down in the Night of Decree' and [2:185] 'The month of Ramadaan is the month in which the Qur'an was revealed.'"},
+{q:"What is Bayt al-'Izza?",opts:["The Cave of Hiraa","The Ka'bah","The House of Honour in the lowest heaven","The Preserved Tablet"],ans:2,exp:"Bayt al-'Izza means 'House of Honour' — it is in the lowest heaven (dunya), where the Qur'an was held before being gradually revealed to the Prophet over 23 years."},
+{q:"True or False: The Qur'an was revealed all at once, like previous scriptures.",opts:["True","False"],ans:1,exp:"False — unlike the Torah, Injeel, and other scriptures which were revealed all at once, the Qur'an was revealed gradually over 23 years. The disbelievers even challenged this in [25:32]."},
+{q:"Who said: 'If wine prohibition had come first, they would have said: We will never leave wine!'?",opts:["Ibn Mas'ood","'Aa'ishah","'Umar","Zayd ibn Thaabit"],ans:1,exp:"'Aa'ishah (ra) said this, explaining the wisdom of gradual revelation: faith and 'aqeedah were established first, then social laws were introduced step by step."},
+{q:"According to Aboo 'Abd al-Rahmaan al-Sulamee, how many verses did the Companions receive at a time?",opts:["3","5","10","20"],ans:2,exp:"They received 10 verses, learned them, understood their meanings, and put them into practice — BEFORE moving on to the next 10 verses."},
+{q:"Which verse is Allah's direct response to the disbelievers' challenge: 'Why is the Qur'an not revealed all at once?'",opts:["2:185","25:32","15:9","56:77"],ans:1,exp:"[25:32] 'And those who disbelieve say: Why is not the Qur'an revealed to him all at once? Thus (it is sent down in parts) that We may strengthen your heart thereby.'"},
+{q:"True or False: One wisdom of gradual revelation was to prove the Prophet's truthfulness, since every question received a divine answer.",opts:["True","False"],ans:0,exp:"True — every time the idolaters or People of the Book posed a challenge, Allah revealed a divine answer, proving the Prophet could not have fabricated it himself. [25:33]"},
+{q:"How many wisdoms/benefits of gradual revelation are discussed in Chapter 4?",opts:["3","4","5","6"],ans:3,exp:"6 wisdoms: strengthen the Prophet's resolve, ease memorization, prove the Prophet's truthfulness, prove miraculous nature, gradual introduction of law, ease the revelation process."}
+],
+5:[
+{q:"According to the MAJORITY opinion, what was the first revelation?",opts:["Soorah al-Muddathir (74:1-7)","The first 5 verses of Soorah al-'Alaq (96:1-5)","Soorah al-Faatihah","Al-Baqarah 2:1-2"],ans:1,exp:"The majority view is that the first 5 verses of Soorah al-'Alaq were the first revelation, based on 'Aa'ishah's detailed narration in al-Bukhaaree about the Cave of Hiraa incident."},
+{q:"How many times did Jibreel press the Prophet during the first revelation?",opts:["Once","Twice","Three times","Five times"],ans:2,exp:"Jibreel embraced and pressed the Prophet THREE times, each time commanding 'Read!' and each time the Prophet replied 'I am not able to read.' After the third time, Jibreel recited [96:1-5]."},
+{q:"Who confirmed the Prophet's prophethood immediately after the first revelation?",opts:["Khadijah's father","Waraqah ibn Nawfal","Aboo Bakr","'Umar"],ans:1,exp:"Waraqah ibn Nawfal — a Christian scholar and Khadijah's cousin. He recognized Jibreel as the same angel sent to Moosa and confirmed this was prophethood."},
+{q:"True or False: The 'Soorah al-Muddathir was first' opinion means it was the first COMPLETE soorah revealed.",opts:["True","False"],ans:0,exp:"True — one reconciliation is that Jaabir (who narrated the Muddathir opinion) was speaking of the first complete soorah, while al-'Alaq was still being revealed in parts."},
+{q:"According to the STRONGEST opinion, what was the LAST verse revealed?",opts:["5:3","2:281","110:1-3","2:278"],ans:1,exp:"2:281: 'And fear the Day on which you will be returned to Allah...' Evidence: Ibn Abbaas in al-Bukhaaree; the Prophet lived only 9 nights after this verse was revealed."},
+{q:"How many days approximately did the Prophet live after the last verse was revealed?",opts:["3 days","9 days","21 days","40 days"],ans:1,exp:"The Prophet ﷺ lived approximately 9 nights after verse 2:281 was revealed — the strongest evidence for it being the final verse."},
+{q:"True or False: 'Today I have perfected your religion' (5:3) was the LAST verse revealed.",opts:["True","False"],ans:1,exp:"False — This is a common misconception. Verse 5:3 was revealed at the Farewell Pilgrimage (Day of 'Arafah), several MONTHS before the Prophet's death. It was not the last verse."},
+{q:"When was 5:3 ('Today I have perfected your religion') revealed?",opts:["After the Prophet's final illness","On the Day of 'Arafah at the Farewell Pilgrimage","During the Hijrah","After the conquest of Makkah"],ans:1,exp:"Verse 5:3 was revealed on the Day of 'Arafah during the Farewell Pilgrimage — months before the Prophet's death. It refers to completion of halaal/haraam laws, not end of revelation."},
+{q:"What type of revelation did the Prophet experience BEFORE formal Qur'anic revelation?",opts:["Like the ringing of a bell","Direct speech from Allah","True righteous dreams","Jibreel in his natural form"],ans:2,exp:"'Aa'ishah narrated: 'The commencement of divine inspiration was in the form of good righteous true dreams in his sleep, like the rising of the sun.' This preceded the formal Qur'anic revelation."},
+{q:"What was the Prophet's physical state when he returned to Khadijah after the FIRST revelation?",opts:["Joyful and excited","Trembling and afraid","Calm and composed","Confused but happy"],ans:1,exp:"The Prophet returned trembling and said 'Cover me! Cover me!' Khadijah wrapped him in a garment. He was deeply shaken by the experience of the first revelation at Cave of Hiraa."}
+],
+6:[
+{q:"What specific event TRIGGERED Aboo Bakr's compilation of the Qur'an?",opts:["The death of the Prophet","The Battle of Yamaamah — where ~70 huffaadh were martyred","The conquest of Makkah","The Hijrah to Madeenah"],ans:1,exp:"After the Prophet's death, wars of apostasy occurred. At the Battle of Yamaamah (12 AH), approximately 70 huffaadh (memorizers) were martyred — alarming 'Umar about the danger of losing the Qur'an."},
+{q:"Who was appointed as the MAIN compiler by Aboo Bakr?",opts:["'Umar ibn al-Khattaab","'Alee ibn Abee Taalib","Zayd ibn Thaabit","Ubay ibn Ka'ab"],ans:2,exp:"Zayd ibn Thaabit was appointed. He was one of the primary scribes of the Prophet and was known for his precision and knowledge of the Qur'an."},
+{q:"What were Zayd ibn Thaabit's TWO requirements for accepting written Qur'anic material?",opts:["2 written copies + 2 witnesses","2 people who learned from the Prophet + 1 written copy supervised by the Prophet","3 memorizers + 2 written copies","Only one authentic memorizer"],ans:1,exp:"Zayd required: (1) at least 2 people who had learned directly from the Prophet + (2) at least 1 written copy that had been supervised by the Prophet himself. Both oral AND written verification."},
+{q:"True or False: During the Prophet's lifetime, the Qur'an was compiled into a single complete book.",opts:["True","False"],ans:1,exp:"False — during the Prophet's lifetime, the Qur'an was memorized by many and written in fragments on various materials, but NOT gathered between two covers into one book."},
+{q:"What event triggered 'UTHMAAN's standardization of the Qur'an?",opts:["The Battle of Yamaamah","Muslims in Armenia and Azerbaijan arguing bitterly about recitations","Aboo Bakr's death","A request from provincial governors"],ans:1,exp:"Muslims in Armenia and Azerbaijan — from different regions with different Companions as teachers — began fighting over recitations. Each said 'My recitation is better!'"},
+{q:"Who came to 'Uthmaan alarmed about Muslim disagreements over the Qur'an?",opts:["'Alee ibn Abee Taalib","Hudhayfah ibn al-Yamaan","Ibn Mas'ood","Zayd ibn Thaabit"],ans:1,exp:"Hudhayfah ibn al-Yamaan came to 'Uthmaan and said: 'Save this ummah before it disagrees about its Book like the Jews and Christians did!'"},
+{q:"How many members were on 'Uthmaan's standardization committee?",opts:["2","3","4","7"],ans:2,exp:"4 members: (1) Zayd ibn Thaabit, (2) 'Abdullaah ibn az-Zubayr, (3) Sa'eed ibn al-'Aas, (4) 'Abd al-Rahmaan ibn al-Haarith."},
+{q:"When dialects differed in spelling, whose dialect was used as the standard?",opts:["The Ansaar's dialect","The Yemeni dialect","The Quraysh dialect","The Basran dialect"],ans:2,exp:"'Uthmaan's instruction: 'If you differ, spell it in the dialect of Quraysh, for the Qur'an was revealed in their tongue.' The Qurayshi dialect was the most widely understood."},
+{q:"True or False: 'Alee ibn Abee Taalib CRITICIZED 'Uthmaan for standardizing the mus-haf.",opts:["True","False"],ans:1,exp:"False — 'Alee actually PRAISED the decision: 'If I were in charge when 'Uthmaan had been, I would have done the same.' He fully endorsed the standardization."},
+{q:"Where was the original mus-haf (compiled by Aboo Bakr) kept before 'Uthmaan used it?",opts:["With Zayd ibn Thaabit","In the Prophet's Mosque","With 'Uthmaan himself","With Hafsah, daughter of 'Umar"],ans:3,exp:"The mus-haf passed: Aboo Bakr → 'Umar → Hafsah (daughter of 'Umar and wife of the Prophet). 'Uthmaan requested it from Hafsah to use for the standardization project."}
+],
+8:[
+{q:"How many ahruf (modes/forms) was the Qur'an revealed in?",opts:["3","5","7","10"],ans:2,exp:"The Qur'an was revealed in 7 ahruf — confirmed by multiple authentic hadith in al-Bukhaaree and Muslim."},
+{q:"In the famous 'Umar-Hishaam incident, what did both men do WRONG initially?",opts:["They recited fake verses","They each claimed the other was wrong about a correct recitation","They stopped praying","They refused to bring their dispute to the Prophet"],ans:1,exp:"'Umar grabbed Hishaam and accused him of reciting wrongly. But the Prophet confirmed BOTH recitations were correct — both were valid ahruf. Neither was wrong."},
+{q:"True or False: The different ahruf were created by the Companions to suit their dialects.",opts:["True","False"],ans:1,exp:"False — the different ahruf came DIRECTLY FROM ALLAH through Jibreel. The Prophet was taught them by Jibreel and taught different ones to different Companions. Companions did not create them."},
+{q:"According to the STRONGEST scholarly opinion, the 7 ahruf represent 7 what?",opts:["Arab tribes","Types/categories of variation","Different languages","Different manuscripts of the Qur'an"],ans:1,exp:"The strongest opinion (Ibn Qutaybah, al-Baaqillaanee, Ibn al-Jazaree) is that the 7 ahruf represent 7 TYPES of variation: wording, letters, word order, addition/subtraction, form, inflection, pronunciation."},
+{q:"Which type of variation does 'maaliki/maliki' in al-Faatihah 1:4 represent?",opts:["Change in wording","Change in word order","Differences in letters within the Uthmaanic script","Form/structure change"],ans:2,exp:"'Maaliki' (Owner) vs 'Maliki' (King) represents Type 2: differences in letters that fit within the Uthmaanic dotless script framework. Both are valid qira'at."},
+{q:"True or False: The 7 ahruf are the same as the 10 Qira'at.",opts:["True","False"],ans:1,exp:"False — the 7 ahruf are the broader category of HOW the Qur'an can be recited. The 10 Qira'at are specific authenticated recitation systems. The 10 Qira'at together express all the variations of the 7 ahruf."},
+{q:"What was the PRIMARY reason multiple ahruf were given?",opts:["To create diversity in Islamic scholarship","To ease memorization and recitation for people of different dialects","To test the Companions","Because Arabic naturally has many dialects"],ans:1,exp:"The hadith is explicit: 'I have been sent to an illiterate nation...' — the ahruf were a MERCY from Allah to ease recitation for people who spoke differently. [Ubay ibn Ka'ab | at-Tirmidhee]"},
+{q:"Who said: 'These seven ahruf are essentially one in meaning; they do not differ about what is permitted or forbidden'?",opts:["Imaam Ahmad","Ibn al-Jazaree","Ibn Shihaab az-Zuhree","Imaam al-Qurtubee"],ans:2,exp:"Ibn Shihaab az-Zuhree made this statement after narrating the hadith of Ibn Abbaas. The variations in ahruf never affect halaal/haraam rulings."},
+{q:"True or False: According to Ibn al-Jazaree, the Uthmaanic mus-hafs contain ALL seven ahruf — not a single letter is missing.",opts:["True","False"],ans:0,exp:"True — Ibn al-Jazaree stated: 'The Uthmaanic mus-hafs contain all seven ahruf — only that which its script allows — not a single letter is missing.' The 10 Qira'at together express all seven."},
+{q:"How many conclusions do we draw from the 3 hadith about the ahruf?",opts:["2","3","4","5"],ans:2,exp:"4 conclusions: (1) Ahruf are from Allah; (2) Multiple ahruf ease recitation; (3) The Prophet taught different ahruf to different Companions; (4) Each harf is complete in itself."}
+],
+9:[
+{q:"How many conditions must be met for a Qiraa'a to be considered AUTHENTIC (Saheeh)?",opts:["1","2","3","4"],ans:2,exp:"According to Ibn al-Jazaree (d.832 AH): 3 conditions — (1) Arabic grammar, (2) Matches an Uthmaanic mus-haf, (3) Authentic mutawaatir chain to the Prophet."},
+{q:"Which type of qiraa'a has an authentic chain and proper Arabic grammar BUT doesn't match the Uthmaanic script?",opts:["Saheeh","Shaadh (Irregular)","Da'eef (Weak)","Baatil (False)"],ans:1,exp:"Shaadh (Irregular) — meets the grammar and chain conditions but NOT the Uthmaanic script condition. It is NOT Qur'an but may be studied as tafseer only."},
+{q:"True or False: It is permissible to pray using a Shaadh (irregular) qiraa'a.",opts:["True","False"],ans:1,exp:"False — it is HARAAM to treat Shaadh readings as Qur'an. Prayer with a Shaadh recitation is INVALID. Only the 10 authentic (Saheeh) qira'at are valid for prayer."},
+{q:"Which student of Qaaree 'Aasim has the most widely-used qiraa'a today?",opts:["Shu'ba","Hafs","Warsh","Qaloon"],ans:1,exp:"Hafs ibn Sulaymaan — the stepson of 'Aasim — is the most famous. His recitation (Hafs 'an 'Aasim) is used by approximately 95% of Muslims worldwide."},
+{q:"Approximately what percentage of Muslims recite Hafs 'an 'Aasim?",opts:["50%","75%","90%","95%"],ans:3,exp:"Hafs 'an 'Aasim is used by approximately 95% of the Muslim world — it is the dominant recitation globally."},
+{q:"Who was the FIRST to formally select and preserve the seven (of the ten) qira'at?",opts:["Imaam ad-Daanee","Aboo Bakr ibn Mujaahid","ash-Shaatibee","Ibn al-Jazaree"],ans:1,exp:"Aboo Bakr ibn Mujaahid (d.324 AH) was the first scholar to formally select and document the seven — the basis for what later became the ten."},
+{q:"Which qiraa'a is primarily used in Algeria, Morocco, and West Africa?",opts:["Hafs 'an 'Aasim","Qaloon 'an Naafi'","Warsh 'an Naafi'","ad-Dooree 'an Aboo 'Amr"],ans:2,exp:"Warsh 'an Naafi' (~3%) is used in Algeria, Morocco, parts of Tunisia, West Africa, and Sudan. Libya and Tunisia predominantly use Qaloon 'an Naafi'."},
+{q:"True or False: In al-Faatihah 1:4, both 'Maaliki' (Owner) and 'Maliki' (King) are authentic qira'at.",opts:["True","False"],ans:0,exp:"True — 'Maaliki' is read by Naafi', Ibn Katheer and others; 'Maliki' is read by 'Aasim and others. Both are authentic Saheeh qira'at giving complementary meanings."},
+{q:"Who added the LAST THREE qira'at (8th, 9th, 10th) to make the total ten?",opts:["ash-Shaatibee","Ibn al-Jazaree","Imaam ad-Daanee","Aboo Bakr ibn Mujaahid"],ans:1,exp:"Ibn al-Jazaree (d.832 AH) added Aboo Jaa'far, Ya'qoob, and Khalaf to make the ten. He also wrote Tayyibah an-Nushr for all ten simultaneously."},
+{q:"Which Qaaree had the HIGHEST (shortest) chain — fewest links back to the Prophet?",opts:["Naafi' al-Madanee","Ibn Katheer al-Makkee","Ibn 'Aamir ash-Shaamee","'Aasim al-Koofee"],ans:2,exp:"Ibn 'Aamir ash-Shaamee (b.21 AH) — born only 21 years after the Hijrah, he studied under the Companion Aboo ad-Dardaa, giving him the fewest links between him and the Prophet."}
+],
+10:[
+{q:"According to the STRONGEST definition, what makes a verse 'Makkee'?",opts:["It was revealed physically in Makkah","It was revealed BEFORE the Hijrah","It addresses the Quraysh","It has short verses"],ans:1,exp:"The strongest (time-based) definition: Makkee = revealed BEFORE the Hijrah, regardless of location. This covers all cases without exception."},
+{q:"True or False: A verse revealed IN MAKKAH after the Hijrah (e.g., during the Farewell Pilgrimage) is classified as 'Makkee'.",opts:["True","False"],ans:1,exp:"False — it is classified as MADANEE. The time-based definition (before/after Hijrah) is strongest. The Farewell Pilgrimage was after the Hijrah, so its verses are Madanee."},
+{q:"Which characteristic is specific to MAKKEE revelations?",opts:["Detailed laws of fasting and zakaah","Discussion with Jews and Christians","Presence of disjointed letters (al-muqatta'aat)","Mention of hudood punishments"],ans:2,exp:"Disjointed letters (Alif-Lam-Meem, Ha-Meem, etc.) are ALL Makkee — with only 2 exceptions: al-Baqarah and Aali-'Imraan (both Madanee)."},
+{q:"Every soorah containing the word 'Kalaa' (Nay!) is classified as:",opts:["Madanee","Makkee","Disputed","From both categories"],ans:1,exp:"Every soorah with 'Kalaa' is Makkee — it appears in 15+ soorahs, all in the latter half of the Qur'an, and all are Makkee."},
+{q:"True or False: Soorah al-Baqarah has disjointed letters but is classified as Madanee.",opts:["True","False"],ans:0,exp:"True — al-Baqarah begins with Alif-Lam-Meem and is Madanee. It is one of only 2 exceptions to the rule that soorahs with disjointed letters are Makkee (the other exception being Aali-'Imraan)."},
+{q:"Which theme is CHARACTERISTIC of MADANEE revelations?",opts:["Stories of previous prophets and nations","Short concise verses with oaths","Call to Tawheed against idolaters","Mention of hypocrites and their plots"],ans:3,exp:"Hypocrisy was a Madeenah phenomenon — when the Muslim community became powerful, hypocrites pretended to be Muslim. ALL soorahs mentioning hypocrites are Madanee (except al-'Ankaboot)."},
+{q:"How many soorahs are classified as Madanee?",opts:["12","20","28","82"],ans:1,exp:"20 soorahs are Madanee, 82 are Makkee, and 12 are disputed. The Madanee 20 include: al-Baqarah, Aali-'Imraan, an-Nisaa', al-Maa'idah, and others."},
+{q:"Which soorah was the FIRST taken from Makkah to Madeenah?",opts:["Al-Faatihah","Al-Baqarah","Soorah Yoosuf","Al-Anfaal"],ans:2,exp:"Soorah Yoosuf was the first Makkee soorah carried to Madeenah, taken by 'Awf ibn 'Afraa' before the Hijrah."},
+{q:"True or False: Knowing Makkee and Madanee classification helps identify which verses are abrogated.",opts:["True","False"],ans:0,exp:"True — when two verses appear to conflict, knowing which is Makkee and which is Madanee helps identify the later (Madanee) verse as the one that abrogates the earlier (Makkee) verse."},
+{q:"What is the PRIMARY benefit of knowing Makkee and Madanee?",opts:["Knowing the historical timeline of battles","Essential for proper Qur'anic understanding and interpretation (tafseer)","Learning Arabic dialects","Understanding the lives of the Companions"],ans:1,exp:"The primary benefit is correct tafseer — you cannot interpret a verse properly without understanding its historical context, audience, and circumstances."}
+],
+11:[
+{q:"What is the Arabic term for 'Causes of Revelation'?",opts:["Asbaab an-Nuzool","Asbab al-Hadith","Usool al-Fiqh","Tafseer al-Qur'an"],ans:0,exp:"Asbaab an-Nuzool (أسباب النزول) — literally 'the causes/reasons of revelation' — refers to the specific events that directly caused particular verses to be revealed."},
+{q:"True or False: MOST of the Qur'an was revealed WITH specific causes of revelation.",opts:["True","False"],ans:1,exp:"False — MOST of the Qur'an was revealed WITHOUT specific asbaab an-nuzool. Allah revealed guidance proactively. Only a portion of the Qur'an has identifiable specific causes."},
+{q:"True or False: Abrahah's attack on the Ka'bah IS the sabab an-nuzool for Soorah al-Feel.",opts:["True","False"],ans:1,exp:"False — Abrahah's attack occurred YEARS before revelation. A sabab an-nuzool must be an event that occurred SHORTLY before the verse was revealed. Long-past events are not asbaab an-nuzool."},
+{q:"According to the KEY PRINCIPLE, what is the basis for applying a Qur'anic ruling?",opts:["The specificity of the occasion","The GENERALITY of the wording","The opinion of the majority of scholars","The historical context only"],ans:1,exp:"MAJORITY VIEW: 'The consideration for a ruling comes from the GENERALITY OF THE WORDING, not the specificity of its circumstance of revelation.' A verse revealed for one event applies to all similar situations."},
+{q:"Which Companion's suggestion led to the MAQAAM IBRAHIM verse [2:125] being revealed?",opts:["Ibn Mas'ood","Zayd ibn Thaabit","'Umar ibn al-Khattaab","Aboo Bakr"],ans:2,exp:"'Umar suggested: 'O Prophet, what if we took the Station of Ibrahim as a place of prayer?' — and the verse [2:125] was revealed confirming this. This is one of 'Umar's 3 'agreements with his Lord.'"},
+{q:"When two AUTHENTIC narrations exist with one being more EXPLICIT, which should be accepted?",opts:["The older one","The one with more narrators","The MORE EXPLICIT one","Both equally with reconciliation"],ans:2,exp:"Rule 2: When both narrations are authentic but one is explicit (clearly states the reason) and one is ambiguous, accept the explicit one. Example: 2:223 — Jaabir's explicit narration over Ibn 'Umar's ambiguous one."},
+{q:"True or False: It is possible for the same verse to have been revealed MORE THAN ONCE.",opts:["True","False"],ans:0,exp:"True — az-Zarkashee: 'It is possible that a verse is revealed twice, to signify its importance.' Example: 9:113 was revealed in response to 3 separate incidents across different time periods."},
+{q:"Who wrote the first book on Asbaab an-Nuzool?",opts:["al-Waahidee","as-Suyootee","'Alee al-Madeenee (teacher of al-Bukhaaree)","Ibn Hajr al-'Asqalaanee"],ans:2,exp:"'Alee al-Madeenee (d.234 AH) — the teacher of Imaam al-Bukhaaree — wrote the first dedicated book on asbaab an-nuzool. al-Waahidee (d.487 AH) later wrote the classic 'Asbab an-Nuzool.'"},
+{q:"Which Companion had FOUR verses revealed in connection with events in his life?",opts:["'Umar ibn al-Khattaab","Aboo Bakr al-Siddeeq","Sa'd ibn Abee Waqqaas","Zayd ibn Thaabit"],ans:2,exp:"Sa'd ibn Abee Waqqaas: (1) mother's hunger strike → [31:15]; (2) first sword drawn in Islam + war booty → [8:1]; (3) illness/bequest question → bequest verse; (4) drinking habit → wine prohibition verse."},
+{q:"al-Waahidee said it is NOT permitted to speak about asbaab an-nuzool except by:",opts:["Personal reasoning and ijtihad","Transmitting reports from those who witnessed the revelation","Reading the tafseer books","Using Arabic language analysis"],ans:1,exp:"al-Waahidee (d.487 AH): 'It is not permitted to speak about asbaab an-nuzool except by transmitting reports from those who witnessed the revelation and were present when it occurred.'"}
+]
+};
+
+const EXTRA_QUIZZES={"1": [{"q": "'Uloom al-Qur'an is best described as:", "opts": ["A single subject on Arabic grammar", "An umbrella covering every field of Islamic knowledge that helps us understand the Qur'an", "A book written by as-Suyootee", "The science of recitation only"], "ans": 1, "exp": "The notes say it is not a single subject but an umbrella over every field that helps us understand the Qur'an. (Section: What is 'Uloom al-Qur'an?)"}, {"q": "The notes compare 'Uloom al-Qur'an to what?", "opts": ["A toolkit", "A ladder", "A library", "A map"], "ans": 0, "exp": "It is described as a toolkit, where each tool answers a different question about the Qur'an. (Section: What is 'Uloom al-Qur'an?)"}, {"q": "Which science answers the question 'Why were specific verses revealed?'", "opts": ["Makkee and Madanee", "al-Ahruf", "Asbaab an-Nuzool", "Gradual Revelation"], "ans": 2, "exp": "Asbaab an-Nuzool deals with why specific verses were revealed. (Section: What is 'Uloom al-Qur'an?)"}, {"q": "A student asks: 'Are there valid different recitations of the Qur'an?' Which science deals with this?", "opts": ["al-Qira'at", "al-Wahy", "Compilation of the Qur'an", "Asbaab an-Nuzool"], "ans": 0, "exp": "al-Qira'at answers whether there are valid different recitations. (Section: What is 'Uloom al-Qur'an?)"}, {"q": "Which science answers 'How was it revealed?'", "opts": ["Gradual Revelation", "al-Wahy (Inspiration)", "al-Ahruf", "Makkee and Madanee"], "ans": 1, "exp": "al-Wahy (Inspiration) covers how the Qur'an was revealed. (Section: What is 'Uloom al-Qur'an?)"}, {"q": "The question 'What are the 7 modes?' belongs to which science?", "opts": ["al-Qira'at", "al-Ahruf", "Compilation of the Qur'an", "Makkee and Madanee"], "ans": 1, "exp": "al-Ahruf deals with the 7 modes. (Section: What is 'Uloom al-Qur'an?)"}, {"q": "Someone takes a ruling meant for a specific case and applies it to everyone. According to the notes, what does this show?", "opts": ["A lack of these sciences", "Correct use of al-Qira'at", "Knowledge of the Ahruf", "Strong Arabic"], "ans": 0, "exp": "Without these sciences a person can apply a specific ruling universally (or vice versa). (Section: Why Study it?)"}, {"q": "Which of these is NOT listed as a danger of reading the Qur'an without these sciences?", "opts": ["Misunderstanding a verse by ignoring its context", "Being confused by different authentic recitations", "Missing the rich layers of meaning in the text", "Forgetting what one has memorised"], "ans": 3, "exp": "The notes list misunderstanding context, misapplying rulings, confusion over recitations and missing layers of meaning; forgetting memorisation is not listed. (Section: Why Study it?)"}, {"q": "Why did the Companions practise these sciences naturally?", "opts": ["They had the books of az-Zarkashee", "They witnessed the revelations firsthand and knew the context of every verse", "The Successors taught them", "They studied under 'Alee al-Madeenee"], "ans": 1, "exp": "The Companions witnessed the revelations firsthand and knew the context of every verse. (Section: Historical Development)"}, {"q": "Which of these was among the first Successors to record explanations?", "opts": ["'Alee al-Madeenee", "Mujaahid", "Imaam az-Zarkashee", "as-Suyootee"], "ans": 1, "exp": "Mujaahid, Sa'eed ibn Jubayr and Qataadah were among the first to record explanations. (Section: Historical Development)"}, {"q": "What did the Successors (Tabi'een) begin doing?", "opts": ["Practising the sciences without records", "Documenting what they received from the Companions", "Writing al-Itqaan", "Formalising the entire discipline"], "ans": 1, "exp": "In the era of the Successors they began documenting what they received from the Companions. (Section: Historical Development)"}, {"q": "'Alee al-Madeenee was the teacher of which Imaam?", "opts": ["Imaam az-Zarkashee", "Imaam al-Bukhaaree", "as-Suyootee", "Ibn Taymiyyah"], "ans": 1, "exp": "'Alee al-Madeenee (d.234 AH) was the teacher of Imaam al-Bukhaaree. (Section: Historical Development)"}, {"q": "Which work do the notes describe as still the standard reference today?", "opts": ["al-Burhaan fi 'Uloom al-Qur'aan", "al-Itqaan fi 'Uloom al-Qur'aan", "'Alee al-Madeenee's book on Asbaab an-Nuzool", "The records of Qataadah"], "ans": 1, "exp": "as-Suyootee's comprehensive al-Itqaan is described as still the standard reference today. (Section: Historical Development)"}, {"q": "Put these in order from earliest to latest death: as-Suyootee, 'Alee al-Madeenee, az-Zarkashee.", "opts": ["az-Zarkashee, 'Alee al-Madeenee, as-Suyootee", "'Alee al-Madeenee, az-Zarkashee, as-Suyootee", "as-Suyootee, az-Zarkashee, 'Alee al-Madeenee", "'Alee al-Madeenee, as-Suyootee, az-Zarkashee"], "ans": 1, "exp": "'Alee al-Madeenee died 234 AH, az-Zarkashee 794 AH and as-Suyootee 911 AH. (Section: Historical Development)"}, {"q": "In the course table, what is the core question for the chapter on the Qira'at?", "opts": ["Why are there 7 modes?", "What are the 10 recitations?", "How was it preserved?", "How do we classify verses?"], "ans": 1, "exp": "The table gives the Qira'at's core question as 'What are the 10 recitations?' (Section: What This Course Covers)"}], "2": [{"q": "The name Al-Qur'an comes from which root?", "opts": ["nazala", "qara'a", "dhakara", "faraqa"], "ans": 1, "exp": "Al-Qur'an is from the root qara'a, to read/recite. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "Roughly how many times is the name Al-Qur'an mentioned in the Qur'an itself?", "opts": ["~70", "4", "55", "140+"], "ans": 0, "exp": "The notes say Al-Qur'an is mentioned about 70 times. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "Which name is linked to the verse [15:9] 'Indeed, it is We who sent down the Reminder...'?", "opts": ["Al-Furqaan", "Al-Dhikr", "Al-Kitaab", "Al-Tanzeel"], "ans": 1, "exp": "Al-Dhikr (The Reminder) is supported by [15:9]. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "The name Al-Tanzeel comes from nazala, meaning:", "opts": ["To read/recite", "To descend from higher to lower", "To distinguish truth from falsehood", "To remind"], "ans": 1, "exp": "Nazala means to descend from higher to lower. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "According to the notes, the name Al-Tanzeel is proof of what?", "opts": ["That the Qur'an was written down", "That Allah is above His creation", "That the Qur'an has 7 modes", "That it is preserved in hearts"], "ans": 1, "exp": "Its meaning of descending from higher to lower is given as proof that Allah is above His creation. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "Which verse is quoted for Al-Kitaab?", "opts": ["[2:1-2]", "[25:1]", "[26:192]", "[15:9]"], "ans": 0, "exp": "[2:1-2] 'This is the Book, there is no doubt in it...' is cited for Al-Kitaab. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "Which name is the criterion that distinguishes tawheed from shirk?", "opts": ["Al-Dhikr", "Al-Furqaan", "Al-Tanzeel", "Al-Qur'an"], "ans": 1, "exp": "Al-Furqaan distinguishes truth from falsehood, good from evil, tawheed from shirk. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "Imaam az-Zarkashee lists 50+ names for the Qur'an. What do scholars clarify about them?", "opts": ["All are independent names", "Most are descriptions and attributes, not actual independent names", "Only the 5 primary names are mentioned in the Qur'an", "They are all names of Al-Kitaab"], "ans": 1, "exp": "Scholars clarify that most are descriptions and attributes, not actual independent names. (Section: The 5 Primary Names of the Qur'an)"}, {"q": "Which verse describes the Qur'an as 'a cure for what is in the breasts'?", "opts": ["[10:57]", "[39:23]", "[18:1-2]", "[25:1]"], "ans": 0, "exp": "[10:57] mentions good advice, a cure for what is in the breasts, guidance and mercy. (Section: The Qur'an Describing Itself)"}, {"q": "Which verse says Allah has not placed any crookedness in the Book?", "opts": ["[39:23]", "[18:1-2]", "[10:57]", "[2:1-2]"], "ans": 1, "exp": "[18:1-2] says Allah sent down the Book and has not placed therein any crookedness. (Section: The Qur'an Describing Itself)"}, {"q": "'The best of you are those who learn the Qur'an and teach it to others' is narrated by:", "opts": ["'Umar ibn al-Khattaab", "Ibn Mas'ood", "Anas ibn Maalik", "Aboo Hurayrah"], "ans": 1, "exp": "The notes attribute it to Ibn Mas'ood, in al-Bukhaaree. (Section: Hadith: Status of the Qur'an)"}, {"q": "Who narrated 'The People of the Qur'an are the People of Allah and His Chosen ones'?", "opts": ["Anas ibn Maalik", "'Aa'ishah", "Ibn Mas'ood", "Aboo Moosaa al-Ash'aree"], "ans": 0, "exp": "It is from Anas ibn Maalik, recorded by an-Nasaa'ee. (Section: Hadith: Status of the Qur'an)"}, {"q": "According to the intercessor hadith, what happens to the one who throws the Qur'an behind his back?", "opts": ["It leads him to Paradise", "It drags him to the Fire", "It intercedes for him anyway", "He gets a double reward"], "ans": 1, "exp": "Whoever throws it behind his back, it drags him to the Fire. (Section: Hadith: Status of the Qur'an)"}, {"q": "A person recites 'Alif-Laam-Meem'. By the hadith, how many letters has he read?", "opts": ["One", "Three", "Ten", "Thirty"], "ans": 1, "exp": "Alif is a letter, Laam is a letter and Meem is a letter, each earning one hasanah equal to ten of its like. (Section: Rewards for Reciting the Qur'an)"}, {"q": "In the analogy, the hypocrite who recites the Qur'an is like:", "opts": ["Citrus fruit", "Dry date", "Basil", "Colocynth"], "ans": 2, "exp": "The hypocrite who recites is like basil: nice smell, bitter taste. (Section: Rewards for Reciting the Qur'an)"}], "3": [{"q": "Which three qualities does the word 'Wahy' imply, according to the notes?", "opts": ["Urgency, hiddenness and directness", "Clarity, loudness and repetition", "Writing, recitation and memorization", "Patience, gradualness and ease"], "ans": 0, "exp": "Wahy means to communicate secretly and swiftly, not in an obvious manner, implying urgency, hiddenness and directness. (Section: What is Wahy?)"}, {"q": "According to [42:51], which of these is NOT one of the 3 ways Allah communicates with prophets?", "opts": ["Direct wahy", "Speech from behind a veil", "Through an angel (Jibreel)", "Through a written tablet handed to the prophet"], "ans": 3, "exp": "[42:51] gives three ways: direct wahy, speech from behind a veil, or through an angel. (Section: What is Wahy?)"}, {"q": "[16:68] 'Your Lord inspired the bee...' is an example of which linguistic use of wahy?", "opts": ["Natural laws of nature", "Animal instinct", "Human intuition (ilhaam)", "Guidance to angels"], "ans": 1, "exp": "The inspiration of the bee is listed as animal instinct. (Section: 7 Linguistic Uses of 'Wahy' in the Qur'an)"}, {"q": "Allah inspiring the mother of Moosa [28:7] is an example of:", "opts": ["Revelation to Prophets", "Signals/gestures", "Human intuition (ilhaam)", "Evil whispers of Shaytaan"], "ans": 2, "exp": "[28:7] is given as the example of human intuition, called ilhaam. (Section: 7 Linguistic Uses of 'Wahy' in the Qur'an)"}, {"q": "Zakariyyah communicating through hand signals [19:11] illustrates which use of wahy?", "opts": ["Signals/gestures", "Animal instinct", "Natural laws of nature", "Revelation to Prophets"], "ans": 0, "exp": "Zakariyyah's hand signals are the example of wahy as signals/gestures. (Section: 7 Linguistic Uses of 'Wahy' in the Qur'an)"}, {"q": "Which verse is cited for wahy as the natural laws of nature, where Allah 'inspired' the heavens with their commands?", "opts": ["[8:12]", "[41:12]", "[4:163]", "[6:121]"], "ans": 1, "exp": "[41:12] is the example for natural laws of nature. (Section: 7 Linguistic Uses of 'Wahy' in the Qur'an)"}, {"q": "According to 'Aa'ishah in al-Bukhaaree, the true dreams at the start of revelation were like what?", "opts": ["The ringing of a bell", "The rising of the sun", "A heavy speech", "The shaking of the heavens"], "ans": 1, "exp": "She described the good, true dreams as coming like the rising of the sun. (Section: Method A: WITHOUT an Intermediary (Direct from Allah))"}, {"q": "Where did Allah speak directly to Moosa?", "opts": ["Cave of Hiraa", "Bayt al-'Izza", "Mount Toor", "Above the 7 skies"], "ans": 2, "exp": "Allah spoke directly to Moosa on Mount Toor [7:143]. (Section: Method A: WITHOUT an Intermediary (Direct from Allah))"}, {"q": "According to Sahih Muslim (173), which of these was NOT among what the Prophet was given at al-Mi'raaj?", "opts": ["The five prayers", "The last verses of al-Baqarah", "Remission of serious sins that do not involve shirk", "The first verses revealed in the Cave of Hiraa"], "ans": 3, "exp": "The hadith lists the five prayers, the last verses of al-Baqarah, and remission of serious sins not involving shirk. (Section: Method A: WITHOUT an Intermediary (Direct from Allah))"}, {"q": "In the hadith from al-Bukhaaree, what happens to the angels when Allah speaks?", "opts": ["They fall in swoon", "They write it down at once", "They descend to earth", "They recite it back to Allah"], "ans": 0, "exp": "The heavens shake severely and the angels fall in swoon; Jibreel is the first to raise his head. (Section: Method B: WITH Jibreel as Intermediary (Primary Method))"}, {"q": "When Jibreel came in the form of a man, what did the Companions see?", "opts": ["Jibreel with his 600 wings", "Only a man", "Nothing at all", "Jibreel in his natural form"], "ans": 1, "exp": "Only the Prophet could see Jibreel; the Companions saw only a man. (Section: Method B: WITH Jibreel as Intermediary (Primary Method))"}, {"q": "A narration says the Prophet sweated heavily on a cold night while receiving revelation. Which way of receiving from Jibreel does this match?", "opts": ["Jibreel in the form of a man", "True dreams", "Like the ringing of a bell", "Inspiration whispered into the heart"], "ans": 2, "exp": "In the bell-like way, the Prophet would sweat profusely even on cold nights. (Section: Method B: WITH Jibreel as Intermediary (Primary Method))"}, {"q": "Which verse is cited as proof that Jibreel was chosen by Allah to deliver the Qur'an?", "opts": ["[26:192-194]", "[42:51]", "[73:5]", "[7:143]"], "ans": 0, "exp": "Jibreel was chosen by Allah [26:192-194] to deliver the Qur'an. (Section: Method B: WITH Jibreel as Intermediary (Primary Method))"}, {"q": "In Ibn al-Qayyim's classification, which type was NOT a way the Qur'an was revealed?", "opts": ["Angel in human form speaking", "Like ringing of a bell", "Inspiration whispered into heart by angel", "Seeing angel in natural form"], "ans": 2, "exp": "Only true dreams and inspiration whispered into the heart by an angel are marked as not used for the Qur'an. (Section: Ibn al-Qayyim's 7-Type Classification)"}], "4": [{"q": "Out of the 23 years of revelation, how many were in Makkah?", "opts": ["10", "13", "15", "23"], "ans": 1, "exp": "The Qur'an was revealed over 23 years: 13 in Makkah and 10 in Madeenah. (Section: The Core Question)"}, {"q": "According to [25:32], why was the Qur'an sent down in parts?", "opts": ["To strengthen the Prophet's heart", "Because it was too long to send at once", "To test the disbelievers' patience", "So that it could be written on the Lauh al-Mahfoodh"], "ans": 0, "exp": "Allah answered: 'Thus (it is sent down in parts) that We may strengthen your heart thereby.' (Section: The Core Question)"}, {"q": "In the hadith about the Pen, what was the first thing Allah created?", "opts": ["The Preserved Tablet", "The Pen", "Bayt al-'Izza", "The heavens"], "ans": 1, "exp": "'The first thing Allah created was the Pen,' and it was told to write the destiny of all things. (Section: The 3 Stages of Revelation)"}, {"q": "Which verse is the evidence that the Qur'an is inscribed in the Lauh al-Mahfoodh?", "opts": ["[97:1]", "[2:185]", "[85:21-22]", "[26:192-194]"], "ans": 2, "exp": "[85:21-22]: 'Nay! This is indeed a Glorious Qur'an! (Inscribed) in the Lauh al-Mahfoodh.' (Section: The 3 Stages of Revelation)"}, {"q": "In which stage did the Qur'an come down ALL AT ONCE?", "opts": ["Stage 1", "Stage 2", "Stage 3", "In none of the stages"], "ans": 1, "exp": "Stage 2, from the Lauh al-Mahfoodh to Bayt al-'Izza, was all at once on Laylat al-Qadr. (Section: The 3 Stages of Revelation)"}, {"q": "A student cites [26:192-194] about the trustworthy angel bringing the Qur'an 'upon your heart'. Which stage is this evidence for?", "opts": ["Stage 1: Lauh al-Mahfoodh", "Stage 2: to Bayt al-'Izza", "Stage 3: to the Prophet through Jibreel", "The creation of the Pen"], "ans": 2, "exp": "[26:192-194] is given as the evidence for Stage 3, from Bayt al-'Izza to the Prophet through Jibreel. (Section: The 3 Stages of Revelation)"}, {"q": "In Stage 3, when would Jibreel bring verses?", "opts": ["Only in Ramadaan", "In response to events, questions and circumstances as they arose", "Only on Laylat al-Qadr", "Only after the Hijrah to Madeenah"], "ans": 1, "exp": "Jibreel brought verses in response to events, questions and circumstances as they arose. (Section: The 3 Stages of Revelation)"}, {"q": "Which two verses are given as evidence for Stage 2?", "opts": ["[2:185] and [97:1]", "[85:21-22] and [25:32]", "[4:82] and [25:33]", "[15:97] and [26:192-194]"], "ans": 0, "exp": "[2:185] on the month of Ramadaan and [97:1] on the Night of Decree. (Section: The 3 Stages of Revelation)"}, {"q": "Which verse is linked to proving the Qur'an's miraculous nature, with zero contradictions?", "opts": ["[25:33]", "[4:82]", "[15:97]", "[97:1]"], "ans": 1, "exp": "6000+ verses over 23 years with zero contradictions [4:82]. (Section: 6 Wisdoms of Gradual Revelation)"}, {"q": "Roughly how many verses does the notes' table say were revealed over 23 years?", "opts": ["600+", "1000+", "6000+", "10,000+"], "ans": 2, "exp": "The table says 6000+ verses over 23 years with zero contradictions. (Section: 6 Wisdoms of Gradual Revelation)"}, {"q": "Besides [25:32], which verse is cited for strengthening the Prophet's resolve against insults and persecution?", "opts": ["[15:97]", "[4:82]", "[2:185]", "[85:21-22]"], "ans": 0, "exp": "Wisdom 1 cites [25:32, 15:97] against insults and persecution from disbelievers. (Section: 6 Wisdoms of Gradual Revelation)"}, {"q": "The prohibition of wine not coming first is an example of which wisdom?", "opts": ["Prove its miraculous nature", "Gradually introduce Islamic law", "Ease the revelation process on the Prophet", "Strengthen the Prophet's resolve"], "ans": 1, "exp": "'Aa'ishah's statement about wine is the example for gradually introducing Islamic law. (Section: 6 Wisdoms of Gradual Revelation)"}, {"q": "Because the Prophet sweated profusely during revelation, receiving it gradually meant less overall burden. Which wisdom is this?", "opts": ["Ease memorization for the Companions", "Prove the Prophet's truthfulness", "Ease the revelation process on the Prophet", "Prove its miraculous nature"], "ans": 2, "exp": "This is the sixth wisdom, easing the revelation process on the Prophet. (Section: 6 Wisdoms of Gradual Revelation)"}, {"q": "Who said that all of this shows the concern and high status given to the Prophet ﷺ?", "opts": ["Imaam Ahmad", "Ibn al-Qayyim", "Ibn Katheer", "'Aa'ishah"], "ans": 2, "exp": "This quote is from Ibn Katheer (d.774 AH). (Section: 6 Wisdoms of Gradual Revelation)"}, {"q": "True or False: The Companions memorized 10 verses but only acted on them after the whole Qur'an was complete.", "opts": ["True", "False"], "ans": 1, "exp": "False. They memorized AND acted on the 10 verses before receiving more. (Section: 6 Wisdoms of Gradual Revelation)"}], "5": [{"q": "When Jibreel commanded \"Read!\", what did the Prophet ﷺ reply?", "opts": ["\"What shall I read?\"", "\"I am not able to read.\"", "\"Cover me! Cover me!\"", "\"Who are you?\""], "ans": 1, "exp": "Each time Jibreel commanded him to read, the Prophet replied: \"I am not able to read.\" (Section: The First Revelation — 2 Opinions)"}, {"q": "According to Waraqah ibn Nawfal, the angel who came to the Prophet was the same angel Allah sent to whom?", "opts": ["Ibraaheem", "'Eesaa", "Moosa", "Nooh"], "ans": 2, "exp": "Waraqah confirmed: \"This is the angel that Allah sent to Moosa!\" (Section: The First Revelation — 2 Opinions)"}, {"q": "Who narrated the opinion that Soorah al-Muddathir was the first revelation?", "opts": ["Ibn Abbaas", "Jaabir ibn 'Abdillaah", "Sa'eed ibn al-Mussayyib", "Waraqah ibn Nawfal"], "ans": 1, "exp": "The second opinion comes from Jaabir ibn 'Abdillaah, whose narration is reconciled with the majority view. (Section: The First Revelation — 2 Opinions)"}, {"q": "Which verse is cited for the second opinion on the first revelation?", "opts": ["96:1", "74:1", "110:1", "2:281"], "ans": 1, "exp": "The second opinion is Soorah al-Muddathir [74:1]: \"O you enveloped (in garments)!\" (Section: The First Revelation — 2 Opinions)"}, {"q": "Besides the 'first complete soorah' explanation, how else is Jaabir's narration reconciled with the majority view?", "opts": ["He was speaking of Madeenan revelation only", "He only heard the latter part of the story, missing the very beginning", "He was narrating from Waraqah", "He confused it with the last revelation"], "ans": 1, "exp": "One reconciliation is that Jaabir only heard the latter part of the story and missed the very beginning. (Section: The First Revelation — 2 Opinions)"}, {"q": "What did the Prophet ﷺ do after Jibreel recited [96:1-5]?", "opts": ["He wrote it down", "He repeated after him", "He remained silent", "He went to Aboo Bakr"], "ans": 1, "exp": "After the three presses, Jibreel recited [96:1-5] and the Prophet repeated after him. (Section: The First Revelation — 2 Opinions)"}, {"q": "Which soorah is described as the last COMPLETE soorah revealed?", "opts": ["Soorah al-Muddathir", "Soorah al-'Alaq", "Soorah an-Nasr", "Soorah al-Baqarah"], "ans": 2, "exp": "Opinion 4 holds that Soorah an-Nasr [110] was the last complete soorah revealed. (Section: The Last Revelation — 5 Opinions)"}, {"q": "The opinion that Soorah an-Nasr was the last complete soorah is based on a narration from Ibn Abbaas found in which collection?", "opts": ["al-Bukhaaree", "Muslim", "Abu Dawood", "at-Tirmidhee"], "ans": 1, "exp": "The evidence for an-Nasr is Ibn Abbaas in Muslim, while 2:281 is from Ibn Abbaas in al-Bukhaaree. (Section: The Last Revelation — 5 Opinions)"}, {"q": "The opinion that 2:282 (the verse of debt) was the last revelation is attributed to whom?", "opts": ["Ibn Abbaas", "Jaabir ibn 'Abdillaah", "Sa'eed ibn al-Mussayyib", "as-Suyootee"], "ans": 2, "exp": "Opinion 3 (2:282, rated moderate) is from Sa'eed ibn al-Mussayyib. (Section: The Last Revelation — 5 Opinions)"}, {"q": "Verse 2:278, the second opinion for the last revelation, concerns what?", "opts": ["Writing down a debt", "Giving up what remains of interest", "Fearing the Day of return to Allah", "Perfecting the religion"], "ans": 1, "exp": "2:278 says: \"Fear Allah and give up what remains of your interest...\" (Section: The Last Revelation — 5 Opinions)"}, {"q": "How did as-Suyootee reconcile opinions 1-3 on the last revelation?", "opts": ["He declared 2:282 the strongest", "He said all three were revealed together at the same time", "He said they were revealed in different years", "He rejected all three in favour of 5:3"], "ans": 1, "exp": "as-Suyootee said there is no contradiction: all three were revealed together, being from the same passage, 2:278-282. (Section: The Last Revelation — 5 Opinions)"}, {"q": "According to the notes, what does 5:3 (\"Today I have perfected your religion\") refer to?", "opts": ["The end of all revelation", "The completion of halaal/haraam laws", "The conquest of Makkah", "The compilation of the mus-haf"], "ans": 1, "exp": "5:3 refers to the completion of halaal/haraam laws, NOT the end of all revelation. (Section: The Last Revelation — 5 Opinions)"}, {"q": "True or False: There is a hadith in which the Prophet ﷺ explicitly said, \"This is the final verse I received.\"", "opts": ["True", "False"], "ans": 1, "exp": "False. No such hadith exists, so scholars weighed the strongest evidence instead. (Section: The Last Revelation — 5 Opinions)"}, {"q": "A student says: \"2:281 and Soorah an-Nasr cannot both be 'last' — one opinion must be wrong.\" What is the best response based on the notes?", "opts": ["2:281 is incorrect, so an-Nasr is last", "They are in different categories: last verse vs. last complete soorah", "Both are rejected in favour of 5:3", "an-Nasr was revealed on the Day of 'Arafah"], "ans": 1, "exp": "An-Nasr is rated strong but in a different category: it is the last complete soorah, while 2:281 is the strongest opinion for the last verse. (Section: The Last Revelation — 5 Opinions)"}, {"q": "How many opinions on the last revelation are listed in the notes?", "opts": ["2", "3", "4", "5"], "ans": 3, "exp": "The notes list 5 opinions on the last revelation, from 2:281 (strongest) to 5:3 (incorrect). (Section: The Last Revelation — 5 Opinions)"}], "6": [{"q": "Which verse contains Allah's promise to guard the Reminder (Dhikr)?", "opts": ["2:281", "5:3", "15:9", "96:1"], "ans": 2, "exp": "[15:9]: \"Indeed, it is We who sent down the Reminder (Dhikr), and indeed, it is We who are its Guardian.\" (Section: Allah's Promise of Preservation)"}, {"q": "Which of these is listed as a material the Qur'an was written on during the Prophet's lifetime?", "opts": ["Smooth stones", "Clay tablets", "Papyrus scrolls", "Bound books"], "ans": 0, "exp": "The materials listed are shoulder bones, smooth stones, date-palm leaves, saddles and leather. (Section: Stage 1: During the Prophet's Lifetime ﷺ)"}, {"q": "Zayd ibn Thaabit said: \"We used to compile the Qur'an from scraps of ___.\"", "opts": ["Bone", "Leather", "Date-palm leaves", "Stone"], "ans": 1, "exp": "Zayd ibn Thaabit said: \"We used to compile the Qur'an from scraps of leather.\" (Section: Stage 1: During the Prophet's Lifetime ﷺ)"}, {"q": "Which of these is one of the 4 reasons the Qur'an was NOT compiled into one book during the Prophet's lifetime?", "opts": ["There were not enough scribes", "Revelation was still continuing", "Writing materials were forbidden", "The Companions disagreed on recitation"], "ans": 1, "exp": "Revelation was still continuing (the last verse came only 9 days before his death), so a single book was not yet possible. (Section: Stage 1: During the Prophet's Lifetime ﷺ)"}, {"q": "Why did the non-chronological arrangement of the Qur'an prevent compilation during the Prophet's lifetime?", "opts": ["It required divine guidance", "It was left to the Companions", "It followed the order of revelation", "It was decided by 'Uthmaan"], "ans": 0, "exp": "The arrangement was non-chronological and required divine guidance, which is one of the 4 reasons. (Section: Stage 1: During the Prophet's Lifetime ﷺ)"}, {"q": "What did Aboo Bakr say when 'Umar first urged him to compile the Qur'an?", "opts": ["\"Bring me Zayd ibn Thaabit.\"", "\"How can I do what the Prophet did not do?\"", "\"Use the dialect of Quraysh.\"", "\"Whoever has learnt any Qur'an, bring it forth.\""], "ans": 1, "exp": "Aboo Bakr hesitated, saying: \"How can I do what the Prophet did not do?\" (Section: Stage 2: Aboo Bakr's Compilation (12 AH))"}, {"q": "How did 'Umar convince Aboo Bakr that compiling the Qur'an was permissible?", "opts": ["It was a direct command of the Prophet", "It was maslaha (public benefit), not bid'ah", "Hudhayfah had requested it", "It was the practice of the Jews and Christians"], "ans": 1, "exp": "'Umar argued that compilation was maslaha (public benefit), not bid'ah (forbidden innovation). (Section: Stage 2: Aboo Bakr's Compilation (12 AH))"}, {"q": "In what year did Aboo Bakr's compilation take place?", "opts": ["12 AH", "24 AH", "25 AH", "9 AH"], "ans": 0, "exp": "Aboo Bakr's compilation is dated 12 AH, while 'Uthmaan's standardization was 24-25 AH. (Section: Stage 2: Aboo Bakr's Compilation (12 AH))"}, {"q": "A man brings a verse written under the Prophet's supervision, but no one else testifies that he learned it directly from the Prophet. Under Zayd's rule, is this enough?", "opts": ["Yes, a supervised written copy is enough", "No, at least 2 people who learned directly from the Prophet are also required", "Yes, if 'Umar approves it", "No, 3 written copies are required"], "ans": 1, "exp": "Zayd's double-verification rule required at least 2 people who learned from the Prophet AND at least 1 supervised written copy. (Section: Stage 2: Aboo Bakr's Compilation (12 AH))"}, {"q": "Who said: \"The person with the greatest rewards regarding the mus-haf is Aboo Bakr\"?", "opts": ["'Umar", "Zayd ibn Thaabit", "'Alee ibn Abee Taalib", "Hudhayfah ibn al-Yamaan"], "ans": 2, "exp": "This statement is from 'Alee ibn Abee Taalib, praising Aboo Bakr's compilation. (Section: Stage 2: Aboo Bakr's Compilation (12 AH))"}, {"q": "Which of these was NOT a member of 'Uthmaan's 4-man committee?", "opts": ["'Abdullaah ibn az-Zubayr", "Sa'eed ibn al-'Aas", "Ubay ibn Ka'ab", "'Abd al-Rahmaan ibn al-Haarith"], "ans": 2, "exp": "The committee was Zayd ibn Thaabit, 'Abdullaah ibn az-Zubayr, Sa'eed ibn al-'Aas and 'Abd al-Rahmaan ibn al-Haarith. Ubay ibn Ka'ab is listed among the memorizers. (Section: Stage 3: 'Uthmaan's Standardization (24-25 AH))"}, {"q": "Which reciter was sent with the copy to Koofah?", "opts": ["Zayd ibn Thaabit", "al-Mugheerah ibn Shu'bah", "Aboo 'Abd ar-Rahmaan as-Sulamee", "Aamir ibn 'Abd al-Qays"], "ans": 2, "exp": "Aboo 'Abd ar-Rahmaan as-Sulamee was sent with the Koofah copy. (Section: Stage 3: 'Uthmaan's Standardization (24-25 AH))"}, {"q": "Which reciter was sent with the copy to Syria?", "opts": ["'Abdullaah ibn Saa'ib", "al-Mugheerah ibn Shu'bah", "Aamir ibn 'Abd al-Qays", "Sa'eed ibn al-'Aas"], "ans": 1, "exp": "al-Mugheerah ibn Shu'bah was sent with the Syrian copy. (Section: Stage 3: 'Uthmaan's Standardization (24-25 AH))"}, {"q": "What happened to the non-standard copies after 'Uthmaan's standardization?", "opts": ["They were kept with Hafsah", "They were sent to Basrah", "They were destroyed", "They were used as commentaries"], "ans": 2, "exp": "All other non-standard copies were destroyed, unifying the ummah on one reading. (Section: Stage 3: 'Uthmaan's Standardization (24-25 AH))"}, {"q": "According to Ibn Taymiyyah's summary, the final recitation is whose recitation?", "opts": ["Ibn Mas'ood's", "Ubay ibn Ka'ab's", "Zayd ibn Thaabit's", "'Uthmaan's"], "ans": 2, "exp": "Ibn Taymiyyah said the final recitation is Zayd ibn Thaabit's, recited to Jibreel in the last year of the Prophet's life. (Section: Stage 3: 'Uthmaan's Standardization (24-25 AH))"}], "8": [{"q": "What is the singular of 'ahruf'?", "opts": ["Harf", "Qiraa'a", "Raawi", "Qaaree"], "ans": 0, "exp": "Ahruf is the plural; its singular is harf. (Section: What are the Ahruf?)"}, {"q": "According to the notes, what are the ahruf?", "opts": ["Different Qur'ans revealed to different tribes", "Different meanings for the same verse", "Different valid pronunciations and word choices for the same revelation", "Copies of the mus-haf sent to different cities"], "ans": 2, "exp": "The ahruf are NOT different Qur'ans or different meanings, but different valid pronunciations and word choices for the same revelation. (Section: What are the Ahruf?)"}, {"q": "Who said: 'Every variation of a word in the Qur'an is a harf'?", "opts": ["Ibn Shihaab az-Zuhree", "Imaam al-Qurtubee", "Ibn Qutaybah", "Ibn al-Jazaree"], "ans": 1, "exp": "This definition is quoted from Imaam al-Qurtubee. (Section: What are the Ahruf?)"}, {"q": "In the hadith of Ibn Abbaas, how did the number of ahruf reach seven?", "opts": ["Jibreel brought all seven at once", "The Companions asked for more", "The Prophet asked Jibreel to increase, and he kept increasing until seven", "Allah revealed one harf each year"], "ans": 2, "exp": "Jibreel first recited in one harf; the Prophet asked him to increase and he increased until they reached seven. (Section: 3 Hadith Proving the Qur'an Was Revealed in 7 Ahruf)"}, {"q": "Which soorah was Hishaam ibn Hakeem reciting when 'Umar objected?", "opts": ["Soorah al-Muddathir", "Soorah al-Furqaan", "Soorah al-Baqarah", "Soorah an-Nasr"], "ans": 1, "exp": "'Umar heard Hishaam ibn Hakeem reciting Soorah al-Furqaan differently from how he was taught. (Section: 3 Hadith Proving the Qur'an Was Revealed in 7 Ahruf)"}, {"q": "After hearing both 'Umar and Hishaam, what did the Prophet tell them to do?", "opts": ["Soorah al-Muddathir", "Soorah al-Furqaan", "Soorah al-Baqarah", "Soorah an-Nasr"], "ans": 1, "exp": "He said both are correct, the Qur'an was revealed in seven ahruf, so recite whichever is easy. (Section: 3 Hadith Proving the Qur'an Was Revealed in 7 Ahruf)"}, {"q": "Which Companion narrated the hadith in which the Prophet said, 'I have been sent to an illiterate nation'?", "opts": ["Ibn Abbaas", "'Umar ibn al-Khattaab", "Ubay ibn Ka'ab", "Hishaam ibn Hakeem"], "ans": 2, "exp": "This hadith is reported by Ubay ibn Ka'ab and collected by at-Tirmidhee. (Section: 3 Hadith Proving the Qur'an Was Revealed in 7 Ahruf)"}, {"q": "The hadith of 'Umar and Hishaam is recorded in which collection(s), according to the notes?", "opts": ["Soorah al-Muddathir", "Soorah al-Furqaan", "Soorah al-Baqarah", "Soorah an-Nasr"], "ans": 1, "exp": "The notes cite al-Bukhaaree and Muslim for the 'Umar-Hishaam hadith. (Section: 3 Hadith Proving the Qur'an Was Revealed in 7 Ahruf)"}, {"q": "Two Companions recite a verse with different ahruf, and both learned it from the Prophet. Based on the conclusions, how should this be viewed?", "opts": ["Only the more common one is valid", "Each harf is complete and valid in itself", "Both must be combined into one reading", "The later one cancels the earlier"], "ans": 1, "exp": "One of the conclusions is that each harf is complete and valid in and of itself, and the Prophet taught different ahruf to different Companions. (Section: 4 Key Conclusions from These Narrations)"}, {"q": "Which of these scholars is NOT listed as holding the strongest opinion on the meaning of the 7 ahruf?", "opts": ["Ibn Qutaybah", "al-Baaqillaanee", "Ibn al-Jazaree", "Imaam al-Qurtubee"], "ans": 3, "exp": "The strongest opinion is attributed to Ibn Qutaybah, al-Baaqillaanee and Ibn al-Jazaree; al-Qurtubee is quoted for the definition of harf. (Section: What Do the 7 Ahruf Actually Mean? (Strongest Opinion))"}, {"q": "Variations such as tashheel and imaalah fall under which type of variation?", "opts": ["Change in word order", "Differences in inflection points", "Differences in pronunciation", "Form/structure change"], "ans": 2, "exp": "Type 7, differences in pronunciation, covers tashheel and imaalah (accent/phonetic variations). (Section: What Do the 7 Ahruf Actually Mean? (Strongest Opinion))"}, {"q": "A reading changes a word from plural to singular. Which type of variation is this?", "opts": ["Form/structure change", "Addition or subtraction of a letter/word", "Change in wording", "Differences in letters"], "ans": 0, "exp": "Plural/singular and gender changes are Type 5, form/structure change, with [23:8] as the example. (Section: What Do the 7 Ahruf Actually Mean? (Strongest Opinion))"}, {"q": "Which verse is given as the example for 'addition or subtraction of a letter/word'?", "opts": ["[3:195]", "[57:24]", "[23:8]", "[2:125]"], "ans": 1, "exp": "[57:24] is listed as the example for addition or subtraction of a letter/word. (Section: What Do the 7 Ahruf Actually Mean? (Strongest Opinion))"}, {"q": "Which type of variation is illustrated by [3:195]?", "opts": ["Differences in inflection points", "Change in word order", "Change in wording", "Differences in pronunciation"], "ans": 1, "exp": "[3:195] is the example for change in word order. (Section: What Do the 7 Ahruf Actually Mean? (Strongest Opinion))"}, {"q": "Which verse is given as the example for 'differences in inflection points'?", "opts": ["[2:125]", "[23:8]", "[57:24]", "[3:195]"], "ans": 0, "exp": "[2:125] is listed as the example for differences in inflection points. (Section: What Do the 7 Ahruf Actually Mean? (Strongest Opinion))"}], "9": [{"q": "What are the two main students of each Qaaree called?", "opts": ["Raawis", "Qaarees", "Huffaadh", "Companions"], "ans": 0, "exp": "Each Qaaree has 2 main students called Raawis. (Section: What are the Qira'at?)"}, {"q": "Who said: 'The recitation of the Qur'an is a Sunnah; the later generations must take it from the earlier ones'?", "opts": ["Ibn al-Jazaree", "'Umar ibn al-Khattaab", "Ubay ibn Ka'ab", "Imaam al-Qurtubee"], "ans": 1, "exp": "The notes attribute this statement to 'Umar ibn al-Khattaab. (Section: What are the Qira'at?)"}, {"q": "A reading follows Arabic grammar and has a mutawaatir chain, but matches none of the Uthmaanic mus-hafs. Is it a valid qiraa'a?", "opts": ["Yes, two conditions are enough", "Yes, if it is famous", "No, all 3 conditions must be met", "Yes, but only outside prayer"], "ans": 2, "exp": "All 3 conditions must be met; if any one is missing, the reading is not a valid qiraa'a. (Section: 3 Conditions for an Authentic Qiraa'a (Ibn al-Jazaree, d.832 AH))"}, {"q": "Which of the following is NOT one of Ibn al-Jazaree's 3 conditions for an authentic qiraa'a?", "opts": ["Conforms to Arabic grammar", "Matches at least one Uthmaanic mus-haf", "Has an authentic mutawaatir chain", "Is recited by the majority of Muslims"], "ans": 3, "exp": "The three conditions are grammar, matching an Uthmaanic mus-haf, and an authentic mutawaatir chain. (Section: 3 Conditions for an Authentic Qiraa'a (Ibn al-Jazaree, d.832 AH))"}, {"q": "A reading fits Arabic grammar and the Uthmaanic script but has no authentic chain. What type is it?", "opts": ["Saheeh", "Shaadh", "Da'eef", "Baatil"], "ans": 2, "exp": "Da'eef (Weak) meets grammar and Uthmaanic script but has no authentic chain, so it is not Qur'an. (Section: 4 Types of Qira'at)"}, {"q": "Which type of qiraa'a meets none of the conditions and is completely rejected?", "opts": ["Shaadh", "Da'eef", "Baatil", "Saheeh"], "ans": 2, "exp": "Baatil (False) meets none of the conditions and is completely rejected. (Section: 4 Types of Qira'at)"}, {"q": "Which non-authentic type of reading may still be studied as tafseer?", "opts": ["Baatil", "Da'eef", "Shaadh", "Saheeh"], "ans": 2, "exp": "Shaadh is not Qur'an but may be studied as tafseer. (Section: 4 Types of Qira'at)"}, {"q": "From which city was the Qaaree Ibn Katheer?", "opts": ["Madeenah", "Makkah", "Basrah", "Koofah"], "ans": 1, "exp": "Ibn Katheer al-Makkee was from Makkah and died 120 AH. (Section: The 10 Authentic Qaarees)"}, {"q": "Which two Qaarees are listed as being from Koofah?", "opts": ["'Aasim and Hamzah", "Naafi' and Aboo Jaa'far", "Aboo 'Amr and Ya'qoob", "al-Kisaa'ee and Khalaf"], "ans": 0, "exp": "'Aasim al-Koofee and Hamzah al-Koofee are both from Koofah. (Section: The 10 Authentic Qaarees)"}, {"q": "Qaloon and Warsh are the Raawis of which Qaaree?", "opts": ["'Aasim al-Koofee", "Naafi' al-Madanee", "Ibn 'Aamir ash-Shaamee", "Aboo Jaa'far al-Madanee"], "ans": 1, "exp": "Naafi' al-Madanee's Raawis are Qaloon and Warsh. (Section: The 10 Authentic Qaarees)"}, {"q": "Which Qaaree is listed with the latest death date, 229 AH?", "opts": ["Ya'qoob al-Basree", "al-Kisaa'ee", "Khalaf al-'Aashir", "Naafi' al-Madanee"], "ans": 2, "exp": "Khalaf al-'Aashir of Baghdad died 229 AH. (Section: The 10 Authentic Qaarees)"}, {"q": "Qaloon 'an Naafi' is mainly found in which countries, according to the notes?", "opts": ["Algeria and Morocco", "Libya and Tunisia", "Parts of Yemen", "West Africa"], "ans": 1, "exp": "Qaloon 'an Naafi' (~0.7%) is listed for Libya and Tunisia. (Section: The 10 Authentic Qaarees)"}, {"q": "In Al-Maa'idah 5:6, the reading 'arjulikum' (genitive) indicates what, and when does it apply?", "opts": ["Wash the feet; for bare feet", "Wipe over the feet; when wearing leather socks", "Wash the feet; when wearing leather socks", "Wipe over the feet; for bare feet"], "ans": 1, "exp": "Arjulikum means wipe over your feet, which applies when wearing leather socks; arjulakum (wash) is for bare feet. (Section: Example: How Different Qira'at Add Meaning)"}, {"q": "Taken together, what do the readings 'Maaliki' and 'Maliki' in al-Faatihah 1:4 teach?", "opts": ["One reading cancels the other", "Allah is both the King and the Owner of the Day of Judgement", "Only the Owner meaning is correct", "They refer to two different days"], "ans": 1, "exp": "Together they show Allah is both the King and the Owner of the Day of Judgement. (Section: Example: How Different Qira'at Add Meaning)"}, {"q": "Which benefit of the qira'at is linked to all chains being mutawaatir?", "opts": ["Removes stagnation", "Facilitation of memorization", "Proof of exact preservation", "Indication of miraculous nature"], "ans": 2, "exp": "Proof of exact preservation is the benefit tied to all chains being mutawaatir. (Section: 5 Benefits of the Different Qira'at)"}], "10": [{"q": "What is the main problem with the PLACE-based definition of Makkee and Madanee?", "opts": ["It cannot classify verses revealed elsewhere, such as Tabook or Jerusalem", "Many verses address all mankind", "It ignores the Farewell Pilgrimage", "It has no problem at all"], "ans": 0, "exp": "The place-based definition cannot classify verses revealed outside Makkah and Madeenah, such as at Tabook or Jerusalem. (Section: 3 Definitions — Which is Correct?)"}, {"q": "What is the main problem with the ADDRESSEE-based definition?", "opts": ["It cannot classify verses revealed at Tabook", "Many verses address all mankind or the People of the Book", "It depends on the date of the Hijrah", "It only covers the disputed soorahs"], "ans": 1, "exp": "The addressee-based definition fails because many verses address all mankind or the People of the Book, not just Quraysh or the Muslims. (Section: 3 Definitions — Which is Correct?)"}, {"q": "Under the addressee-based definition, a Madanee verse is one that addresses:", "opts": ["Quraysh and the polytheists", "Muslims and hypocrites", "Only the People of the Book", "The previous nations"], "ans": 1, "exp": "Definition 3 says Madanee verses address the Muslims and hypocrites, while Makkee verses address Quraysh and the polytheists. (Section: 3 Definitions — Which is Correct?)"}, {"q": "Verse 5:3 (\"Today I have perfected your religion...\") was revealed in which setting?", "opts": ["During the Farewell Pilgrimage in Makkah", "At Tabook", "In Madeenah before the Hijrah", "In Jerusalem"], "ans": 0, "exp": "It was revealed during the Farewell Pilgrimage in Makkah, yet it is classified as Madanee because it came after the Hijrah. (Section: 3 Definitions — Which is Correct?)"}, {"q": "According to the notes, how long did the Makkah phase of revelation last?", "opts": ["10 years", "13 years", "20 years", "23 years"], "ans": 1, "exp": "The Qur'an was revealed over two phases: Makkah (13 years) and Madeenah (10 years). (Chapter introduction)"}, {"q": "Makkee soorahs taught morality, such as caring for orphans. What did they NOT yet contain?", "opts": ["Stories of previous nations", "Mention of the Day of Judgement", "Specific legal rulings", "Affirmation of Allah's Names and Attributes"], "ans": 2, "exp": "Makkee soorahs gave broad moral principles like care for orphans and no female infanticide, but no specific legal rulings yet. (Section: Themes of MAKKEE Soorahs)"}, {"q": "In Makkee soorahs, what purpose did the stories of previous nations serve?", "opts": ["To set out inheritance laws", "Encouragement for the believers and warnings for the disbelievers", "To debate the Jews and Christians", "To expose the hypocrites"], "ans": 1, "exp": "The stories gave encouragement to the believers and warnings to the disbelievers. (Section: Themes of MAKKEE Soorahs)"}, {"q": "Which of these is a theme of MADANEE soorahs?", "opts": ["Pure Tawheed against false deities", "Stories of the creation of Aadam", "System of laws such as marriage, inheritance and hudood", "Short verses with frequent oaths"], "ans": 2, "exp": "Madanee soorahs set out a system of laws: jihaad, marriage, inheritance, governance and hudood punishments. (Section: Themes of MADANEE Soorahs)"}, {"q": "Why did dialogue with Jews and Christians appear in Madanee soorahs?", "opts": ["To expose corruption in their books and clarify the truth", "To set the times of prayer", "To tell the story of Aadam", "To warn Quraysh"], "ans": 0, "exp": "Madanee soorahs engaged the Jews and Christians, exposing corruption in their books and clarifying the truth. (Section: Themes of MADANEE Soorahs)"}, {"q": "A soorah contains a verse of prostration (sajdah at-tilaawah). How is it classified?", "opts": ["Madanee", "Makkee", "Disputed", "It cannot be known"], "ans": 1, "exp": "Soorahs with a verse of prostration are all Makkee. (Section: Quick Identification Rules)"}, {"q": "Soorahs mentioning the hypocrites are Madanee, with one exception. Which?", "opts": ["Al-Baqarah", "Aali-'Imraan", "Al-'Ankaboot", "Al-Faatihah"], "ans": 2, "exp": "Soorahs mentioning hypocrites are all Madanee except Soorah al-'Ankaboot. (Section: Quick Identification Rules)"}, {"q": "Stories of previous prophets and the creation of Aadam mark a soorah as Makkee, with one exception. Which?", "opts": ["Aali-'Imraan", "Al-Baqarah", "Al-'Ankaboot", "Al-Faatihah"], "ans": 1, "exp": "Stories of previous prophets and the creation of Aadam are all Makkee except al-Baqarah. (Section: Quick Identification Rules)"}, {"q": "A soorah mentions jihaad in the fighting sense and addresses the Jews. Applying the rules, it is most likely:", "opts": ["Makkee", "Madanee", "Disputed", "Makkee, because it addresses others"], "ans": 1, "exp": "Mention of jihaad in the fighting sense and address to Jews or Christians are both signs of a Madanee soorah. (Section: Quick Identification Rules)"}, {"q": "Which of these soorahs is listed among the 12 disputed soorahs?", "opts": ["Al-Baqarah", "Al-Ikhlaas", "Aali-'Imraan", "Al-'Ankaboot"], "ans": 1, "exp": "The 12 disputed soorahs include al-Faatihah, al-Ikhlaas, al-Falaq and an-Naas. (Section: Quick Identification Rules)"}, {"q": "Which lesson for da'wah comes from knowing Makkee and Madanee?", "opts": ["Begin with laws, then beliefs", "Always begin with Tawheed before laws", "Begin with stories of previous nations", "Begin with dialogue with the People of the Book"], "ans": 1, "exp": "The Makkee-then-Madanee order shows the method for da'wah: always begin with Tawheed before laws. (Section: 6 Benefits of Knowing Makkee and Madanee)"}], "11": [{"q": "What are the two requirements for an event to count as a sabab an-nuzool?", "opts": ["It must be a specific incident or question, and occur shortly before the revelation", "It must be narrated by 'Umar and be in al-Bukhaaree", "It must involve the hypocrites and occur in Madeenah", "It must be a story of a previous nation and be well known"], "ans": 0, "exp": "A sabab an-nuzool must be a specific incident or question, and it must have occurred shortly before the revelation. (Section: What is Sabab an-Nuzool?)"}, {"q": "Which of these can NOT be a sabab an-nuzool?", "opts": ["A question put to the Prophet shortly before a verse", "An incident involving a Companion just before a verse", "Stories of previous nations", "A dispute over war booty"], "ans": 2, "exp": "Stories of previous nations, knowledge of the unseen, and events long before are not asbaab an-nuzool. (Section: What is Sabab an-Nuzool?)"}, {"q": "True or False: Knowledge of the unseen counts as a sabab an-nuzool.", "opts": ["True", "False"], "ans": 1, "exp": "False. Knowledge of the unseen is listed among the things that are NOT a sabab an-nuzool. (Section: What is Sabab an-Nuzool?)"}, {"q": "What is the PRIMARY source of asbaab an-nuzool?", "opts": ["Statements of the Successors", "Hadith from the Prophet ﷺ", "Statements of al-Waahidee", "Stories of previous nations"], "ans": 1, "exp": "The primary source is hadith from the Prophet ﷺ; the secondary source is statements of the Companions who witnessed the revelations. (Section: Sources of Asbaab an-Nuzool)"}, {"q": "Why are the Companions' statements accepted as a source for asbaab an-nuzool?", "opts": ["They wrote the first books on it", "They witnessed the revelations", "They were all Successors", "They lived after the Successors"], "ans": 1, "exp": "The Companions are a secondary source because they witnessed the revelations. (Section: Sources of Asbaab an-Nuzool)"}, {"q": "Which of these is named as a Successor whose reports on asbaab an-nuzool may be accepted?", "opts": ["Mujaahid ibn Jabr", "Ibn Mas'ood", "Jaabir", "Sa'd ibn Abee Waqqaas"], "ans": 0, "exp": "Successors known for accuracy in tafseer, like Mujaahid ibn Jabr, 'Ikrimah, Sa'eed ibn Jubayr and Qataadah, may be accepted. (Section: Sources of Asbaab an-Nuzool)"}, {"q": "For Soorah ad-Duhaa there is a weak narration about a puppy and an authentic one from 'Aa'ishah. What is the rule?", "opts": ["Accept both", "Accept the authentic one and reject the weak", "Accept the more explicit one", "The soorah was revealed twice"], "ans": 1, "exp": "When one narration is weak and one authentic, accept the authentic ('Aa'ishah's, in al-Bukhaaree) and reject the weak. (Section: 4 Rules: When Multiple Causes Exist for One Verse)"}, {"q": "Two equally authentic causes are reported for the li'aan verses (24:6). How are they handled?", "opts": ["The weaker one is rejected", "Both may have applied at the same time", "The verse was revealed twice", "The more explicit one is accepted"], "ans": 1, "exp": "When both are authentic and equal, both may have applied together; for li'aan, two cases were brought at the same time. (Section: 4 Rules: When Multiple Causes Exist for One Verse)"}, {"q": "Verse 9:113 has authentic causes from different times. What does the rule conclude?", "opts": ["Only the earliest is accepted", "The verse may have been revealed more than once", "Both are rejected", "The more explicit one wins"], "ans": 1, "exp": "When both causes are authentic but from different timeframes, the verse may have been revealed more than once, as with 9:113. (Section: 4 Rules: When Multiple Causes Exist for One Verse)"}, {"q": "Which verse was revealed after 'Umar suggested the Prophet's wives wear hijab?", "opts": ["[2:125]", "[33:53]", "[66:5]", "[8:1]"], "ans": 1, "exp": "[33:53] was revealed after 'Umar suggested the hijab for the Prophet's wives. (Section: Famous Examples)"}, {"q": "Which verse is linked to the hunger strike of Sa'd ibn Abee Waqqaas's mother?", "opts": ["[8:1]", "[31:15]", "[59:7]", "[11:114]"], "ans": 1, "exp": "His mother's hunger strike, meant to make him leave Islam, is linked to [31:15]. (Section: Famous Examples)"}, {"q": "Verse [8:1] relates to Sa'd ibn Abee Waqqaas in connection with:", "opts": ["His illness and bequests", "A dispute over war booty", "His drinking habit", "His mother's hunger strike"], "ans": 1, "exp": "Sa'd was the first Muslim to draw a sword, and a dispute over war booty led to [8:1]. (Section: Famous Examples)"}, {"q": "Verse [59:7] was revealed about war booty. According to the key principle, what does it apply to?", "opts": ["Only war booty", "All commands of the Prophet ﷺ", "Only the battle it was revealed about", "Only matters of prayer"], "ans": 1, "exp": "Because the ruling follows the generality of the wording, [59:7] applies to all commands of the Prophet ﷺ; Ibn Mas'ood applied it even to eyebrow plucking. (Section: The Key Principle (Most Important!))"}, {"q": "A man asked whether [11:114] applied only to him. What did the Prophet reply?", "opts": ["\"Yes, only for you\"", "\"No, for all of mankind\"", "\"Only for the Companions\"", "\"Only for those who repent\""], "ans": 1, "exp": "The Prophet replied \"No, for all of mankind\", showing the ruling is not limited to the event. (Section: The Key Principle (Most Important!))"}, {"q": "Verse [111:1] about Aboo Lahab illustrates which benefit of knowing asbaab an-nuzool?", "opts": ["Removes misinterpretations", "Clarifies scope", "Reveals context, such as eternal disgrace for a disbeliever", "Deepens understanding of the wording"], "ans": 2, "exp": "Knowing the context reveals honour for a Companion like 'Umar or eternal disgrace for a disbeliever like Aboo Lahab [111:1]. (Section: 4 Benefits of Knowing Asbaab an-Nuzool)"}]};
+const FINAL_QUIZ=[
+{q:"What does 'Uloom al-Qur'an mean?",opts:["Laws of the Qur'an","Sciences of the Qur'an","Interpretation of the Qur'an","History of Islam"],ans:1,exp:"'Uloom al-Qur'an = The Sciences of the Qur'an — the collective term for all Islamic fields of knowledge relating to the Qur'an."},
+{q:"How many times is Al-Kitab mentioned in the Qur'an?",opts:["4","55","77","140"],ans:2,exp:"Al-Kitab (The Book) is mentioned 77 times in the Qur'an."},
+{q:"What is the PRIMARY verse describing the 3 ways Allah communicates with prophets?",opts:["4:163","26:192","42:51","2:185"],ans:2,exp:"[42:51] describes 3 methods: direct wahy, speech from behind a veil, or through an angel (Jibreel)."},
+{q:"On which night was the ENTIRE Qur'an sent to the lowest heaven?",opts:["Laylat al-Miraj","Laylat al-Qadr","Laylat al-Bara'ah","Laylat al-Jumu'ah"],ans:1,exp:"Laylat al-Qadr in Ramadaan — [97:1] 'We have sent it down in the Night of Decree.'"},
+{q:"The FIRST revelation was the opening verses of which soorah?",opts:["Al-Muddathir","Al-Baqarah","Al-'Alaq","Al-Faatihah"],ans:2,exp:"The first 5 verses of Soorah al-'Alaq (96:1-5) — revealed at Cave of Hiraa, confirmed by 'Aa'ishah in al-Bukhaaree."},
+{q:"How many huffaadh (memorizers) were martyred at the Battle of Yamaamah?",opts:["10","40","70","100"],ans:2,exp:"Approximately 70 huffaadh were martyred at Yamaamah — this triggered Aboo Bakr's compilation of the Qur'an into a single book."},
+{q:"Who said 'Save this ummah before it disagrees about its Book like Jews and Christians did'?",opts:["'Alee ibn Abee Taalib","Zayd ibn Thaabit","Hudhayfah ibn al-Yamaan","'Umar ibn al-Khattaab"],ans:2,exp:"Hudhayfah ibn al-Yamaan said this to 'Uthmaan — triggering the standardization of the Qur'an into one mus-haf distributed to all provinces."},
+{q:"How many ahruf (modes) was the Qur'an revealed in?",opts:["3","5","7","10"],ans:2,exp:"The Qur'an was revealed in 7 ahruf — confirmed by multiple hadith in al-Bukhaaree and Muslim."},
+{q:"How many conditions must a Qiraa'a meet to be authentic?",opts:["1","2","3","4"],ans:2,exp:"3 conditions (Ibn al-Jazaree): Arabic grammar + matches Uthmaanic script + authentic mutawaatir chain back to the Prophet."},
+{q:"A verse revealed BEFORE the Hijrah is classified as:",opts:["Madanee","Makkee","Disputed","Neither"],ans:1,exp:"Makkee — the strongest (time-based) definition: Makkee = revealed before Hijrah, Madanee = revealed after Hijrah."},
+{q:"The KEY PRINCIPLE about asbaab an-nuzool says rulings are based on:",opts:["The specificity of the occasion","The generality of the wording","The scholar's interpretation","The historical context"],ans:1,exp:"'The consideration for a ruling comes from the GENERALITY OF THE WORDING, not the specificity of its circumstance of revelation.'"},
+{q:"Approximately how many years did the Prophet live after the LAST verse was revealed?",opts:["9 days","1 month","6 months","1 year"],ans:0,exp:"The Prophet ﷺ lived approximately 9 DAYS after verse 2:281 (the last verse) was revealed — making it very clear this was the final revelation."},
+{q:"Which Qaaree's recitation do approximately 95% of Muslims use today?",opts:["Naafi' al-Madanee","'Aasim via his student Hafs","Ibn Katheer al-Makkee","Aboo 'Amr al-Basree"],ans:1,exp:"Hafs 'an 'Aasim — the recitation of Hafs (student of 'Aasim al-Koofee) is used by approximately 95% of the Muslim world."},
+{q:"How many soorahs are classified as Madanee?",opts:["12","20","82","114"],ans:1,exp:"20 soorahs are Madanee, 82 are Makkee, and 12 are disputed in classification."},
+{q:"True or False: The different ahruf came directly from Allah — they were NOT invented by Companions.",opts:["True","False"],ans:0,exp:"True — the ahruf came from Allah through Jibreel to the Prophet. The Prophet was taught them by Jibreel and then taught different ones to different Companions based on their needs."},
+{q:"What is 'Bayt al-'Izza'?",opts:["The Cave of Hiraa","The Ka'bah","The House of Honour in the lowest heaven","The Preserved Tablet"],ans:2,exp:"Bayt al-'Izza = 'House of Honour' in the lowest heaven. The entire Qur'an was sent here on Laylat al-Qadr before being revealed gradually to the Prophet over 23 years."},
+{q:"Which type of qira'a meets Arabic grammar + chain conditions but NOT the Uthmaanic script?",opts:["Saheeh","Shaadh","Da'eef","Baatil"],ans:1,exp:"Shaadh (Irregular) — not mutawaatir and doesn't match the Uthmaanic script. NOT Qur'an. May only be studied as tafseer."},
+{q:"True or False: MOST of the Qur'an has specific identifiable causes of revelation.",opts:["True","False"],ans:1,exp:"False — MOST of the Qur'an was revealed without specific asbaab an-nuzool. Only a portion has identifiable specific events that caused their revelation."},
+{q:"What was the key difference between Aboo Bakr's mus-haf and 'Uthmaan's standardization?",opts:["Aboo Bakr's was the first complete collection; 'Uthmaan standardized one dialect and distributed copies","Aboo Bakr used only memory; 'Uthmaan used only writing","They were identical","'Uthmaan added new verses"],ans:0,exp:"Aboo Bakr compiled the FIRST complete mus-haf (emergency preservation after Yamaamah). 'Uthmaan STANDARDIZED it to one dialect (Quraysh) and distributed official copies to provinces, destroying non-standard ones."},
+{q:"Which Companion had 4 Qur'anic verses revealed in connection with events in his life?",opts:["'Umar ibn al-Khattaab","Aboo Bakr","Sa'd ibn Abee Waqqaas","Ibn Mas'ood"],ans:2,exp:"Sa'd ibn Abee Waqqaas — events in his life (mother's strike, first sword in Islam, illness/bequest, drinking habit) each prompted specific Qur'anic revelation."}
+];
+// ============ STATE ============
+const CHAPTER_ORDER=[1,2,3,4,5,6,8,9,10,11];
+let S={
+  view:'home',
+  chId:null,
+  progress:JSON.parse(safeStorage.getItem('uaq_prog')||'{}'),
+  finalDone:safeStorage.getItem('uaq_final')==='1',
+  finalScore:parseInt(safeStorage.getItem('uaq_fscore')||'0'),
+  qz:null // {chId, qs, cur, score, answers, done}
+};
+const CHAP_ID = 'uloomalquran';
+function save(){
+  safeStorage.setItem('uaq_prog',JSON.stringify(S.progress));
+  safeStorage.setItem('uaq_final',S.finalDone?'1':'0');
+  safeStorage.setItem('uaq_fscore',S.finalScore);
+}
+function getProg(id){return S.progress['c'+id]||{read:false,qDone:false,qScore:0,qTotal:10}}
+function setProg(id,data){S.progress['c'+id]=Object.assign(getProg(id),data);save()}
+function countDone(){return CHAPTER_ORDER.filter(id=>getProg(id).qDone).length}
+function allDone(){return CHAPTER_ORDER.every(id=>getProg(id).qDone)}
+
+// ============ SIDEBAR ============
+function updateNav(){
+  const nav=document.getElementById('chapterNav');
+  nav.innerHTML=CHAPTER_ORDER.map(id=>{
+    const ch=CHAPTERS.find(c=>c.id===id);
+    const p=getProg(id);
+    const active=S.chId===id&&(S.view==='chapter'||S.view==='quiz'||S.view==='results');
+    return `<button class="nav-item${active?' active':''}${p.qDone?' done':''}" onclick="goChapter(${id})"${active?' aria-current="page"':''}>
+      <span class="nav-num">${ch.num}</span>
+      <span class="nav-lbl">${ch.title}</span>
+      ${p.qDone?'<span class="nav-tick" aria-label="completed">✓</span>':''}
+    </button>`;
+  }).join('');
+  document.getElementById('finalNavBtn').disabled=!allDone();
+}
+function updateTopbar(){
+  const done=countDone();
+  const pct=(done/10)*100;
+  document.getElementById('pbarFill').style.width=pct+'%';
+  document.getElementById('topCounter').textContent=done+'/10';
+  document.getElementById('pbar').setAttribute('aria-valuenow',done);
+  const ch=S.chId?CHAPTERS.find(c=>c.id===S.chId):null;
+  document.getElementById('topTitle').textContent=ch?ch.title:"'Uloom al-Qur'an Study Guide";
+}
+
+// ============ RENDER ============
+function render(view,chId,extraState){
+  S.view=view;
+  if(chId!==undefined)S.chId=chId;
+  if(extraState)Object.assign(S,extraState);
+  updateNav();
+  updateTopbar();
+  const el=document.getElementById('content');
+  el.className='fade';
+  void el.offsetWidth;
+  switch(S.view){
+    case'home':el.innerHTML=renderHome();break;
+    case'chapter':el.innerHTML=renderChapter();if(S.chId)setProg(S.chId,{read:true});break;
+    case'quiz':el.innerHTML=renderQuizView();break;
+    case'results':el.innerHTML=renderResults();break;
+    case'final-intro':el.innerHTML=renderFinalIntro();break;
+    case'final-quiz':el.innerHTML=renderQuizView(true);break;
+    case'final-results':el.innerHTML=renderFinalResultsView();break;
+    case'glossary':el.innerHTML=renderGlossary();break;
+  }
+  afterRender(el);
+  window.scrollTo(0,0);
+}
+
+function goChapter(id){
+  closeSidebar();
+  safeStorage.setItem('uaq_last',id);
+  render('chapter',id);
+}
+
+// ============ HOME ============
+function renderHome(){
+  const done=countDone();
+  const pct=Math.round((done/10)*100);
+  const cards=CHAPTER_ORDER.map(id=>{
+    const ch=CHAPTERS.find(c=>c.id===id);
+    const p=getProg(id);
+    let badges='';
+    if(p.read)badges+=`<span class="badge read">Read</span>`;
+    if(p.qDone)badges+=`<span class="badge quiz">Quiz ${p.qScore}/${p.qTotal}</span>`;
+    return `<button class="ch-card${p.qDone?' done-card':''}" onclick="goChapter(${id})">
+      <div class="ch-icon">${ch.icon}</div>
+      <div class="ch-info">
+        <div class="ch-num-label">Chapter ${ch.num}</div>
+        <div class="ch-card-title">${ch.title}</div>
+        <div class="ch-card-sub">${ch.sub}</div>
+        ${badges?`<div class="ch-badges">${badges}</div>`:''}
+      </div>
+    </button>`;
+  }).join('');
+  return `<div class="home-screen">
+    <div class="home-bism">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+    <h1 class="home-h">'Uloom al-Qur'an</h1>
+    <p class="home-sub">Interactive Study Guide · 10 Chapters · Quizzes &amp; Progress Tracking</p>
+    <div class="summary-bar">
+      <div><div class="stat-n">${done}</div><div class="stat-l">Chapters Complete</div></div>
+      <div><div class="stat-n">${pct}%</div><div class="stat-l">Overall Progress</div></div>
+      <div><div class="stat-n">${allDone()?(S.finalDone?S.finalScore+'/20':'Ready!'):'—'}</div><div class="stat-l">${allDone()?(S.finalDone?'Final Score':'Final Quiz'):'Complete All First'}</div></div>
+    </div>
+    ${continueBtn()}
+    <div class="ch-grid">${cards}</div>
+    ${allDone()?`<div style="text-align:center;margin-top:18px"><button class="btn-start-final" onclick="showFinalQuiz()">🏆 Take the Final Comprehensive Quiz</button></div>`:''}
+  </div>`;
+}
+
+// ============ CHAPTER ============
+function renderChapter(){
+  const ch=CHAPTERS.find(c=>c.id===S.chId);
+  const p=getProg(S.chId);
+  const idx=CHAPTER_ORDER.indexOf(S.chId);
+  const prevId=idx>0?CHAPTER_ORDER[idx-1]:null;
+  const nextId=idx<CHAPTER_ORDER.length-1?CHAPTER_ORDER[idx+1]:null;
+  const quizHtml=p.qDone?
+    `<div class="quiz-cta"><div class="qcta-icon">✅</div><div class="qcta-title">${ch.title} Quiz — Complete!</div>
+    <div class="qcta-done">🌟 Your Score: ${p.qScore} / ${p.qTotal}</div>
+    <div><button class="redo-lnk" onclick="startQuiz(${S.chId})">Retake Quiz</button></div></div>`:
+    `<div class="quiz-cta"><div class="qcta-icon">📝</div><div class="qcta-title">Chapter Quiz</div>
+    <div class="qcta-sub">Test your understanding — 10 questions</div>
+    <button class="btn-quiz" onclick="startQuiz(${S.chId})">Start Quiz</button></div>`;
+  const navRow=`<div class="ch-nav-row">
+    <button class="btn-nav" onclick="render('home')">🏠 Home</button>
+    ${prevId?`<button class="btn-nav" onclick="goChapter(${prevId})">← Previous</button>`:''}
+    ${nextId?`<button class="btn-nav pri" onclick="goChapter(${nextId})">Next Chapter →</button>`:''}
+  </div>`;
+  return `<div class="chapter-view">
+    <div class="ch-num-badge">Chapter ${ch.num} of 10</div>
+    <h2 class="ch-main-title">${ch.title}</h2>
+    <p class="ch-main-sub">${ch.sub}</p>
+    <div class="ch-intro">${ch.intro}</div>
+    <div id="chBody">${ch.content}</div>
+    <div class="recap" id="recap"></div>
+    ${quizHtml}
+    ${navRow}
+  </div>`;
+}
+
+// ============ QUIZ ============
+function startQuiz(chId){
+  const qs=drawQuiz(chId,10);
+  S.qz={chId,qs,cur:0,score:0,answers:[],done:false,isFinal:false};
+  render('quiz',chId);
+}
+function showFinalQuiz(){
+  closeSidebar();
+  render('final-intro',null);
+}
+function startFinalQuiz(){
+  const qs=shuffle(CHAPTER_ORDER.flatMap(id=>drawQuiz(id,2)));
+  S.qz={chId:null,qs,cur:0,score:0,answers:[],done:false,isFinal:true};
+  render('final-quiz',null);
+}
+
+function renderQuizView(isFinal){
+  isFinal=isFinal||S.qz.isFinal;
+  const{qs,cur,score,answers,done}=S.qz;
+  const total=qs.length;
+  const q=qs[cur];
+  const pct=Math.round((cur/total)*100);
+  const chName=isFinal?'Final Comprehensive Quiz':(()=>{const ch=CHAPTERS.find(c=>c.id===S.chId);return ch?`Chapter ${ch.num}: ${ch.title}`:''})();
+  const letters=['A','B','C','D'];
+  const answered=answers[cur]!==undefined;
+  const chosen=answers[cur];
+  const opts=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(answered){
+      if(i===q.ans)cls+=' cor';
+      else if(i===chosen)cls+=' wrg';
+    } else if(i===chosen)cls+=' sel';
+    return `<button class="opt${answered?' '+cls.replace('opt','').trim():''}" ${answered?'disabled':''} onclick="answerQ(${i})">
+      <span class="opt-l">${letters[i]}</span>${o}
+    </button>`;
+  }).join('');
+  const fb=answered?`<div class="feedback show ${chosen===q.ans?'cor-f':'wrg-f'}">
+    <div class="fl">${chosen===q.ans?'✅ Correct!':'❌ Incorrect'}</div>
+    ${q.exp}
+  </div>`:'';
+  const nextBtn=answered?`<div class="qbtn-row"><button class="btn-next" onclick="nextQ()">${cur<total-1?'Next Question →':'See Results'}</button></div>`:'';
+  return `<div class="quiz-wrap">
+    <div class="quiz-lbl">${chName}</div>
+    <div class="quiz-prow">
+      <span class="quiz-qc">Q${cur+1} of ${total}</span>
+      <div class="quiz-track"><div class="quiz-pfill" style="width:${pct}%"></div></div>
+      <span class="quiz-score">${score}/${cur+(answered?1:0)}</span>
+    </div>
+    <div class="q-card">
+      <div class="q-text">${q.text||q.q}</div>
+      <div class="opts">${opts}</div>
+      ${fb}
+      ${nextBtn}
+    </div>
+  </div>`;
+}
+
+function answerQ(i){
+  const{qs,cur,answers}=S.qz;
+  if(answers[cur]!==undefined)return;
+  S.qz.answers[cur]=i;
+  if(i===qs[cur].ans)S.qz.score++;
+  render(S.view,S.chId);
+}
+
+function nextQ(){
+  const{qs,cur,isFinal}=S.qz;
+  if(cur<qs.length-1){
+    S.qz.cur++;
+    render(S.view,S.chId);
+  } else {
+    S.qz.done=true;
+    if(isFinal){
+      S.finalDone=true;
+      S.finalScore=S.qz.score;
+      save();
+      render('final-results',null);
+    } else {
+      const pct = Math.round((S.qz.score / qs.length) * 100);
+      if (pct >= 60) {
+        setProg(S.chId,{qDone:true,qScore:S.qz.score,qTotal:qs.length});
+      }
+      
+      render('results',S.chId);
+    }
+  }
+}
+
+function renderResults(){
+  const{score,qs,answers}=S.qz;
+  const total=qs.length;
+  const pct=score/total;
+  const stars=pct>=0.9?'⭐⭐⭐':pct>=0.7?'⭐⭐':pct>=0.6?'⭐':'';
+  const msg=pct>=0.9?'Excellent! Outstanding knowledge of this chapter.':
+    pct>=0.7?'Great job! A solid understanding of the material.':
+    pct>=0.6?'Good effort! Review the chapter and try again.':
+    'Keep studying! You need at least 60% to pass. Re-read the chapter carefully and try once more.';
+  const idx=CHAPTER_ORDER.indexOf(S.chId);
+  const nextId=idx<CHAPTER_ORDER.length-1?CHAPTER_ORDER[idx+1]:null;
+  const revItems=qs.map((q,i)=>{
+    const yours=answers[i];
+    const ok=yours===q.ans;
+    return `<div class="rev-item${ok?' was-ok':''}">
+      <div class="rev-q">Q${i+1}: ${q.text||q.q}</div>
+      <div class="rev-yours">${ok?'✅':'❌'} Your answer: ${q.opts[yours]}</div>
+      ${!ok?`<div class="rev-correct">✅ Correct: ${q.opts[q.ans]}</div>`:''}
+      <div class="rev-exp">${q.exp}</div>
+    </div>`;
+  }).join('');
+  return `<div class="res-wrap">
+    <div class="res-stars">${stars}</div>
+    <div class="res-circle"><div class="res-sn">${score}</div><div class="res-st">out of ${total}</div></div>
+    <div class="res-title">${CHAPTERS.find(c=>c.id===S.chId).title}</div>
+    <div class="res-msg">${msg}</div>
+    ${pct<0.6?`<div class="fail-box" role="alert"><b>Not passed yet.</b> You need 6 out of 10 to complete this chapter. Read the chapter again, then retry.<div><button class="rbtn pri" onclick="startQuiz(${S.chId})">🔄 Retry Quiz</button></div></div>`:`<div class="pass-box">✅ Chapter complete</div>`}
+    <div class="res-btns">
+      <button class="rbtn" onclick="goChapter(${S.chId})">📖 Review Chapter</button>
+      <button class="rbtn" onclick="startQuiz(${S.chId})">🔄 Retake Quiz</button>
+      ${nextId?`<button class="rbtn pri" onclick="goChapter(${nextId})">Next Chapter →</button>`:''}
+      ${allDone()?`<button class="rbtn pri" onclick="showFinalQuiz()">🏆 Final Quiz</button>`:''}
+    </div>
+    <div class="review"><h4>Review Answers</h4>${revItems}</div>
+  </div>`;
+}
+
+// ============ FINAL ============
+function renderFinalIntro(){
+  return `<div class="final-intro">
+    <div class="fi-icon">🏆</div>
+    <h2 class="fi-title">Final Comprehensive Quiz</h2>
+    <p class="fi-desc">You've completed all 10 chapters. This final quiz covers all topics — 20 questions drawn from every chapter. Test your mastery of 'Uloom al-Qur'an!</p>
+    <div class="fi-stats">
+      <div class="fi-stat-n">20<div class="fi-stat-l">Questions</div></div>
+      <div class="fi-stat-n">10<div class="fi-stat-l">Chapters Covered</div></div>
+      ${S.finalDone?`<div class="fi-stat-n">${S.finalScore}/20<div class="fi-stat-l">Best Score</div></div>`:''}
+    </div>
+    <button class="btn-start-final" onclick="startFinalQuiz()">Start Final Quiz</button>
+    <div class="lock-note">You've completed all chapters — well done!</div>
+  </div>`;
+}
+
+function renderFinalResultsView(){
+  const{score,qs,answers}=S.qz;
+  const total=qs.length;
+  const pct=score/total;
+  const stars=pct>=0.9?'⭐⭐⭐':pct>=0.7?'⭐⭐':pct>=0.5?'⭐':'';
+  const msg=pct>=0.9?'Mastered! You have an exceptional command of all 10 chapters.':
+    pct>=0.7?'Well done! Strong overall knowledge of \'Uloom al-Qur\'an.':
+    pct>=0.5?'Good effort! Review the weaker chapters and try again.':
+    'Keep studying! Work through the chapters again and retake the quiz.';
+  const revItems=qs.map((q,i)=>{
+    const yours=answers[i];
+    const ok=yours===q.ans;
+    return `<div class="rev-item${ok?' was-ok':''}">
+      <div class="rev-q">Q${i+1}: ${q.text||q.q}</div>
+      <div class="rev-yours">${ok?'✅':'❌'} Your answer: ${q.opts[yours]}</div>
+      ${!ok?`<div class="rev-correct">✅ Correct: ${q.opts[q.ans]}</div>`:''}
+      <div class="rev-exp">${q.exp}</div>
+    </div>`;
+  }).join('');
+  return `<div class="res-wrap">
+    <div class="res-stars">${stars}</div>
+    <div class="res-circle"><div class="res-sn">${score}</div><div class="res-st">out of ${total}</div></div>
+    <div class="res-title">Final Quiz — Complete!</div>
+    <div class="res-msg">${msg}</div>
+    <div class="res-btns">
+      <button class="rbtn" onclick="render('home')">🏠 Home</button>
+      <button class="rbtn" onclick="startFinalQuiz()">🔄 Retake Final Quiz</button>
+    </div>
+    <div class="review"><h4>Review All Answers</h4>${revItems}</div>
+  </div>`;
+}
+
+// ============ SIDEBAR TOGGLE ============
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('on');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('on');
+}
+
+
+// ============ EXTRAS ============
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function bank(id){return (QUIZZES[id]||[]).concat(EXTRA_QUIZZES[id]||[])}
+// pick n random questions; shuffle answer order (True/False kept in order)
+function drawQuiz(id,n){
+  return shuffle(bank(id)).slice(0,n).map(q=>{
+    if(q.opts.length<=2)return q;
+    const order=shuffle(q.opts.map((_,i)=>i));
+    return Object.assign({},q,{opts:order.map(i=>q.opts[i]),ans:order.indexOf(q.ans)});
+  });
+}
+function ringSvg(pct){const r=26,c=2*Math.PI*r;return `<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--line2)" stroke-width="5"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="url(#rg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct)}" transform="rotate(-90 32 32)"/><defs><linearGradient id="rg"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient></defs></svg>`}
+let spy=null;
+function renderRail(){
+  const box=document.getElementById('railIn');if(!box)return;
+  const done=countDone();
+  let html=`<div class="rail-card"><div class="rail-h">Your progress</div><div class="ring">${ringSvg(done/10)}<div><div class="ring-n">${done}/10</div><div class="ring-l">chapters passed</div></div></div></div>`;
+  if(S.view==='chapter'){
+    const hs=[...document.querySelectorAll('#chBody .sec > h3')];
+    const p=getProg(S.chId);
+    html=`<div class="rail-card"><div class="rail-h">On this page</div><nav class="toc">${hs.map(h=>`<a href="#${h.id}" data-id="${h.id}">${h.textContent}</a>`).join('')}</nav></div>`+html+
+      `<div class="rail-card"><div class="rail-h">Chapter quiz</div><div class="ring-l">${p.qDone?`Passed · best ${p.qScore}/${p.qTotal}`:`10 random questions from a bank of ${bank(S.chId).length}`}</div><button class="rail-btn" onclick="startQuiz(${S.chId})">${p.qDone?'Retake quiz':'Start quiz'}</button></div>`;
+  }
+  box.innerHTML=html;
+  box.querySelectorAll('.toc a').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById(a.dataset.id).scrollIntoView({behavior:'smooth'})});
+  if(spy)spy.disconnect();
+  if(S.view==='chapter'&&'IntersectionObserver' in window){
+    spy=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){box.querySelectorAll('.toc a').forEach(a=>a.classList.toggle('on',a.dataset.id===en.target.id))}})},{rootMargin:'-80px 0px -65% 0px'});
+    document.querySelectorAll('#chBody .sec > h3').forEach(h=>spy.observe(h));
+  }
+}
+function continueBtn(){
+  const last=parseInt(safeStorage.getItem('uaq_last')||'0');
+  let id=CHAPTER_ORDER.includes(last)?last:null;
+  if(!id){id=CHAPTER_ORDER.find(i=>!getProg(i).qDone)||null;if(!id)return '';}
+  const ch=CHAPTERS.find(c=>c.id===id);
+  const started=!!safeStorage.getItem('uaq_last');
+  return `<button class="continue-btn" onclick="goChapter(${id})">${started?'▶ Continue where you left off':'▶ Start with'} — Chapter ${ch.num}: ${ch.title}</button>`;
+}
+
+const AR_RE=/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\s\u200c\u200d.,،:]*/g;
+function markArabic(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{
+    const p=n.parentElement;if(!p||p.closest('[lang="ar"],[lang="ur"],script,style'))return NodeFilter.FILTER_REJECT;
+    AR_RE.lastIndex=0;return AR_RE.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  nodes.forEach(n=>{
+    const urdu=n.parentElement.closest('.ur');
+    const frag=document.createDocumentFragment();let last=0;const t=n.nodeValue;AR_RE.lastIndex=0;let m;
+    while((m=AR_RE.exec(t))){
+      const txt=m[0].replace(/\s+$/,'');if(!txt)continue;
+      if(m.index>last)frag.append(t.slice(last,m.index));
+      const sp=document.createElement('span');sp.lang=urdu?'ur':'ar';sp.dir='rtl';sp.className=urdu?'urt':'art';sp.textContent=txt;frag.append(sp);
+      last=m.index+txt.length;
+    }
+    if(last<t.length)frag.append(t.slice(last));
+    n.replaceWith(frag);
+  });
+}
+
+function buildRecap(){
+  const box=document.getElementById('recap');const body=document.getElementById('chBody');
+  if(!box||!body)return;
+  const hs=[...body.querySelectorAll('.sec > h3')];
+  if(!hs.length){box.remove();return;}
+  hs.forEach((h,i)=>h.id='sec-'+i);
+  box.innerHTML=`<h3>🔑 Key points of this chapter</h3><p>Before the quiz, make sure you can explain each of these:</p><ol>${hs.map((h,i)=>`<li><a href="#sec-${i}" onclick="event.preventDefault();document.getElementById('sec-${i}').scrollIntoView({behavior:'smooth'})">${h.textContent}</a></li>`).join('')}</ol>`;
+}
+
+// Glossary: every definition below is taken from this guide's own text
+const GLOSSARY=[
+{term:"'Uloom al-Qur'an",ar:"علوم القرآن",mean:"The Sciences of the Qur'an: an umbrella for every field of Islamic knowledge that helps us understand the Qur'an.",ch:1},
+{term:"Al-Qur'an",ar:"القرآن",mean:"The Recitation. From qara'a, to read or recite. Preserved in the hearts of believers.",ch:2},
+{term:"Al-Kitaab",ar:"الكتاب",mean:"The Book. Emphasises its written preservation.",ch:2},
+{term:"Al-Furqaan",ar:"الفرقان",mean:"The Criterion, which distinguishes truth from falsehood.",ch:2},
+{term:"Al-Dhikr",ar:"الذكر",mean:"The Reminder of mankind's purpose and their Lord.",ch:2},
+{term:"Al-Tanzeel",ar:"التنزيل",mean:"The Revelation. From nazala, to descend from higher to lower.",ch:2},
+{term:"Wahy",ar:"وحي",mean:"Linguistically: to inspire, to communicate secretly and swiftly. The divine system Allah used to communicate with the Prophet ﷺ.",ch:3},
+{term:"Mus-haf",ar:"",mean:"A written copy of the Qur'an. Aboo Bakr compiled the first complete mus-haf; 'Uthmaan sent standard copies to the provinces.",ch:6},
+{term:"Harf / Ahruf",ar:"",mean:"The various valid ways certain verses can be read. Not different Qur'ans or meanings. The Qur'an was revealed in 7 ahruf.",ch:8},
+{term:"Qiraa'a / Qiraa'aat",ar:"",mean:"The authenticated ways of reciting the Qur'an, each with its own tajweed rules, named after a master reciter.",ch:9},
+{term:"Qaaree",ar:"",mean:"A master reciter after whom a qiraa'a is named.",ch:9},
+{term:"Raawi",ar:"",mean:"One of the two main students of each Qaaree.",ch:9},
+{term:"Mutawaatir",ar:"",mean:"A chain of narration so widely transmitted it is certain. Required for an authentic qiraa'a.",ch:9},
+{term:"Makkee",ar:"",mean:"Revealed before the Hijrah (the strongest of the three definitions).",ch:10},
+{term:"Madanee",ar:"",mean:"Revealed after the Hijrah, even if revealed in Makkah (e.g. 5:3).",ch:10},
+{term:"Sabab / Asbaab an-Nuzool",ar:"أسباب النزول",mean:"A specific event or question that directly caused a verse to be revealed, shortly before it.",ch:11}
+];
+function buildGlossary(){return GLOSSARY}
+function showGlossary(){closeSidebar();render('glossary',null);}
+function renderGlossary(){
+  const g=buildGlossary();
+  return `<div class="gloss">
+    <h2 class="ch-main-title">Glossary of Terms</h2>
+    <p class="ch-main-sub">Key terms used in this guide. Tap a chapter to read where it is explained.</p>
+    <input id="glossQ" class="gloss-q" type="search" placeholder="Search terms…" oninput="filterGloss(this.value)" aria-label="Search glossary">
+    <div id="glossList">${g.map(x=>{const ch=CHAPTERS.find(c=>c.id===x.ch);return `<div class="g-item" data-k="${(x.term+' '+x.mean).toLowerCase()}">
+      <div class="g-top"><span class="g-term">${x.term}</span>${x.ar?`<span class="g-ar">${x.ar}</span>`:''}</div>
+      ${x.mean?`<div class="g-mean">${x.mean}</div>`:''}
+      <button class="g-ch" onclick="goChapter(${x.ch})">Chapter ${ch.num}: ${ch.title}</button></div>`}).join('')}</div>
+    <div class="ch-nav-row"><button class="btn-nav" onclick="render('home')">🏠 Home</button></div>
+  </div>`;
+}
+function filterGloss(q){q=q.toLowerCase().trim();document.querySelectorAll('.g-item').forEach(el=>{el.style.display=!q||el.dataset.k.includes(q)?'':'none'})}
+
+function afterRender(el){
+  if(S.view==='chapter')buildRecap();
+  renderRail();
+  markArabic(el);
+  markArabic(document.getElementById('topTitle'));
+}
+
+// Theme
+function applyTheme(t){
+  if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.removeAttribute('data-theme');
+  t=t||'dark';document.documentElement.setAttribute('data-theme',t);const dark=t==='dark';
+  document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';
+  document.querySelector('meta[name=theme-color]').content=dark?'#060b14':'#eef2f8';
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'dark';
+  const nxt=cur==='dark'?'light':'dark';safeStorage.setItem('uaq_theme',nxt);applyTheme(nxt);
+}
+applyTheme(safeStorage.getItem('uaq_theme'));
+
+
+// Keyboard: ← → between chapters, Esc closes menu
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeSidebar();return;}
+  if(e.target.matches('input,textarea')||e.altKey||e.ctrlKey||e.metaKey)return;
+  if(S.view!=='chapter')return;
+  const i=CHAPTER_ORDER.indexOf(S.chId);
+  if(e.key==='ArrowRight'&&i<CHAPTER_ORDER.length-1)goChapter(CHAPTER_ORDER[i+1]);
+  if(e.key==='ArrowLeft'&&i>0)goChapter(CHAPTER_ORDER[i-1]);
+});
+
+// ============ INIT ============
+render('home');
+</script>
+</body>
+</html>
